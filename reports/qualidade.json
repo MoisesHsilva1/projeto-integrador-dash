@@ -1,0 +1,48 @@
+{
+  "checksum_md5": "e90efcb83d69faf99fcab8b0255024de",
+  "auditoria": {
+    "linhas": 284807,
+    "colunas": 31,
+    "valores_ausentes": 0,
+    "duplicatas_exatas": 1081,
+    "duplicatas_fraudes": 19,
+    "fraudes": 492,
+    "legitimas": 284315,
+    "taxa_fraude": 0.001727485630620034,
+    "inicio_segundos": 0.0,
+    "fim_segundos": 172792.0,
+    "duracao_horas": 47.99777777777778,
+    "valor_total": 25162590.01,
+    "valor_mediano": 22.0,
+    "valor_minimo": 0.0,
+    "valor_maximo": 25691.16,
+    "valor_zero_transacoes": 1825,
+    "valor_zero_fraudes": 27,
+    "sem_duplicatas": {
+      "linhas": 283726,
+      "fraudes": 473,
+      "legitimas": 283253,
+      "taxa_fraude": 0.001667101358352777
+    }
+  },
+  "registro": {
+    "linhas_originais": 284807,
+    "linhas_finais": 283726,
+    "fraudes_originais": 492,
+    "fraudes_finais": 473,
+    "legitimas_finais": 283253,
+    "taxa_fraude_final": 0.001667101358352777,
+    "remocoes": [
+      {
+        "regra": "Remoção de duplicatas exatas (mantida a primeira ocorrência)",
+        "linhas_removidas": 1081,
+        "fraudes_removidas": 19
+      }
+    ],
+    "mantidos": [
+      "Transações com Amount = 0 (não são valores inválidos na base).",
+      "Outliers de Amount: não removidos; fraudes podem estar nos extremos.",
+      "Atributos V1–V28: mantidos como componentes PCA anonimizados."
+    ]
+  }
+}

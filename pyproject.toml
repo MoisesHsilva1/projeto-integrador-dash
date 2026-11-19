@@ -1,0 +1,46 @@
+[project]
+name = "projeto-integrador"
+version = "0.1.0"
+description = "Projeto integrador"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "matplotlib>=3.11.2",
+    "numpy>=2.4.6",
+    "pandas>=3.1.1",
+    "plotly>=6.0.0",
+    "pyarrow>=26.0.1",
+    "scikit-learn>=1.9.1",
+    "seaborn>=0.13.2",
+    "streamlit>=1.67.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff>=0.9",
+]
+
+[project.scripts]
+projeto-integrador = "projeto_integrador.main:main"
+projeto-integrador-pipeline = "projeto_integrador.cli:main"
+projeto-integrador-dashboard = "projeto_integrador.cli:abrir_dashboard"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
