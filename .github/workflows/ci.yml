@@ -5,9 +5,17 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -15,16 +23,17 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
+          python-version: '3.12'
           enable-cache: true
 
-      - name: Set up Python 3.12
-        run: uv python install 3.12
-
       - name: Install dependencies
-        run: uv sync --dev
+        run: uv sync --locked --extra dev
 
       - name: Lint
         run: uv run ruff check .
 
+      - name: Check formatting
+        run: uv run ruff format --check .
+
       - name: Test
-        run: uv run pytest
+        run: uv run pytest -q

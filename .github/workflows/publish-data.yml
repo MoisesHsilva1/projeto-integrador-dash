@@ -1,9 +1,5 @@
 name: Publish dashboard data
 
-# Reproducible pipeline for the data consumed by the hosted dashboard.
-# The raw base is a GitHub Release asset; this workflow runs the preparation
-# step and publishes the resulting Parquet back to the same release.
-
 on:
   workflow_dispatch:
     inputs:
@@ -16,12 +12,15 @@ on:
         required: true
         default: "creditcard.csv"
 
-permissions:
-  contents: write
-
 jobs:
   prepare-and-publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    concurrency:
+      group: publish-data
+      cancel-in-progress: false
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -29,10 +28,17 @@ jobs:
       - name: Set up uv
         uses: astral-sh/setup-uv@v5
         with:
+          python-version: '3.12'
           enable-cache: true
 
-      - name: Set up Python 3.12
-        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Verify the release exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null
 
       - name: Download the raw base from the release
         env:
@@ -40,6 +46,7 @@ jobs:
           RELEASE_TAG: ${{ inputs.release_tag }}
           RAW_ASSET: ${{ inputs.raw_asset }}
         run: |
+          set -euo pipefail
           mkdir -p data/raw data/processed
           gh release download "$RELEASE_TAG" \
             --repo "$GITHUB_REPOSITORY" \
@@ -51,17 +58,41 @@ jobs:
             mv "data/raw/$RAW_ASSET" data/raw/creditcard.csv
           fi
 
-      - name: Prepare the Parquet base (E2/E3)
-        run: uv run --python 3.12 credit-card-fraud-pipeline prepare
+      - name: Validate the raw CSV
+        run: |
+          set -euo pipefail
+          echo "## Raw CSV" >> "$GITHUB_STEP_SUMMARY"
+          echo "- path: data/raw/creditcard.csv" >> "$GITHUB_STEP_SUMMARY"
+          echo "- size: $(stat -c%s data/raw/creditcard.csv) bytes" >> "$GITHUB_STEP_SUMMARY"
+          echo "- sha256: $(sha256sum data/raw/creditcard.csv | cut -d' ' -f1)" >> "$GITHUB_STEP_SUMMARY"
+          test -s data/raw/creditcard.csv
 
-      - name: Validate the output
-        run: test -s data/processed/transactions.parquet
+      - name: Prepare the Parquet base (E2/E3)
+        run: uv run credit-card-fraud-pipeline prepare
+
+      - name: Validate the prepared base
+        run: |
+          set -euo pipefail
+          uv run python - <<'PY'
+          import pandas as pd
+          df = pd.read_parquet("data/processed/transactions.parquet")
+          assert len(df) > 0, "prepared base is empty"
+          assert "Class" in df.columns, "prepared base is missing 'Class'"
+          frauds = int(df["Class"].sum())
+          assert 0 < frauds < len(df), "unexpected fraud count"
+          print(f"rows={len(df)} frauds={frauds}")
+          PY
+          echo "## Prepared Parquet" >> "$GITHUB_STEP_SUMMARY"
+          echo "- path: data/processed/transactions.parquet" >> "$GITHUB_STEP_SUMMARY"
+          echo "- size: $(stat -c%s data/processed/transactions.parquet) bytes" >> "$GITHUB_STEP_SUMMARY"
+          echo "- sha256: $(sha256sum data/processed/transactions.parquet | cut -d' ' -f1)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish the prepared base to the release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
+          set -euo pipefail
           gh release upload "$RELEASE_TAG" \
             data/processed/transactions.parquet \
             --repo "$GITHUB_REPOSITORY" \
