@@ -7,6 +7,7 @@ import hashlib
 import json
 import subprocess
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -278,8 +279,8 @@ def run_experiments() -> dict[str, object]:
     artifact = load_model_artifact()
     if artifact is None:
         raise FileNotFoundError(
-            "Model artifact not found. Run "
-            "`uv run credit-card-fraud-pipeline train` before the experiments."
+            f"Model artifact not found: {MODEL_PATH}. "
+            "Run the 'train' step before 'experiments'."
         )
     model = artifact["model"]
     artifact_metadata = artifact["metadata"]
@@ -424,14 +425,52 @@ def open_dashboard() -> None:
 
 
 def run_all() -> None:
-    """Run preparation, EDA, and modeling in sequence."""
-    prepare_data()
-    generate_eda()
-    train_models()
+    """Run preparation, EDA, and modeling in sequence, reporting elapsed time."""
+    steps = [
+        ("Prepare (E2/E3)", prepare_data),
+        ("EDA (E4)", generate_eda),
+        ("Train (E5–E7)", train_models),
+    ]
+    total_start = time.perf_counter()
+    for label, step in steps:
+        step_start = time.perf_counter()
+        print(f"\n── {label} ──")
+        step()
+        elapsed = time.perf_counter() - step_start
+        print(f"   ✓ {label} done in {elapsed:.1f}s")
+
+    total = time.perf_counter() - total_start
     print(
-        "Full pipeline complete. Start the dashboard with: "
-        "uv run credit-card-fraud-dashboard"
+        f"\nFull pipeline complete in {total:.1f}s. "
+        "Start the dashboard with: uv run credit-card-fraud-dashboard"
     )
+
+
+def _check_prerequisites(command: str) -> None:
+    """Validate required files exist before running a pipeline step.
+
+    Raises FileNotFoundError with a clear, actionable message when a required
+    file is missing, so users know exactly what to do next.
+    """
+    needs_raw = {"prepare", "all", "eda", "train", "imbalance", "experiments"}
+    needs_processed = {"eda", "train", "imbalance", "experiments"}
+    needs_model = {"experiments"}
+
+    if command in needs_raw and not RAW_PATH.exists():
+        raise FileNotFoundError(
+            f"Raw file not found: {RAW_PATH}\n"
+            "Place 'creditcard.csv' in data/raw/ before running the pipeline."
+        )
+    if command in needs_processed and not PROCESSED_PATH.exists():
+        raise FileNotFoundError(
+            f"Prepared base not found: {PROCESSED_PATH}\n"
+            "Run the 'prepare' step first: credit-card-fraud-pipeline prepare"
+        )
+    if command in needs_model and not MODEL_PATH.exists():
+        raise FileNotFoundError(
+            f"Model artifact not found: {MODEL_PATH}\n"
+            "Run the 'train' step first: credit-card-fraud-pipeline train"
+        )
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -473,6 +512,7 @@ def main(argv: list[str] | None = None) -> None:
     }
 
     try:
+        _check_prerequisites(args.command)
         commands[args.command]()
     except (FileNotFoundError, SchemaError, ValueError) as error:
         raise SystemExit(f"Error: {error}") from error
