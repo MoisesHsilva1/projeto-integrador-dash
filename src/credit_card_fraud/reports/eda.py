@@ -100,6 +100,7 @@ def _value_by_class_figure(transactions: pd.DataFrame, destination: Path) -> Pat
         hue="class_",
         palette=palette,
         legend=False,
+        orient="v",
         ax=axes[1],
     )
     axes[1].set_yscale("log")
