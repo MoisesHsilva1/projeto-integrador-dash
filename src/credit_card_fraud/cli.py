@@ -452,7 +452,7 @@ def _check_prerequisites(command: str) -> None:
     Raises FileNotFoundError with a clear, actionable message when a required
     file is missing, so users know exactly what to do next.
     """
-    needs_raw = {"prepare", "all", "eda", "train", "imbalance", "experiments"}
+    needs_raw = {"prepare", "all", "train"}
     needs_processed = {"eda", "train", "imbalance", "experiments"}
     needs_model = {"experiments"}
 
