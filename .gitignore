@@ -22,7 +22,6 @@ reports/model/*.joblib
 # Streamlit secrets (never commit)
 .streamlit/secrets.toml
 
-# Documentação, README e contexto de agentes
+# Documentação interna e contexto de agentes
 docs/
 AGENTS.md
-README.md
