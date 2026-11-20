@@ -1,489 +1,488 @@
-# Plano do Projeto Integrador — Detecção de Fraudes em Transações com Cartão de Crédito
+# Projeto Integrador — Project Plan: Credit Card Fraud Detection
 
 **Grupo 54 — Centro Universitário SENAC**
 
-- **Integrantes:** Alex Oliveira Veras, Jhonatan da Silva Ribeiro, Magno Henrique Souza Cardoso, Moises Henrique da Silva e Taynan Nunes de Araujo.
-- **Tema:** detecção de fraudes em transações financeiras realizadas com cartão de crédito.
-- **Status deste documento:** planejamento consolidado e implementação iniciada. O MVP (E2–E8) foi implementado sobre a base MLG/ULB; as decisões da implementação estão em [`DECISIONS.md`](DECISIONS.md) e os resultados vêm do pipeline executado em 18/11/2026.
-- **Última atualização:** 18/11/2026.
-- **Documento complementar:** [`AGENTS.md`](../AGENTS.md), com o contexto operacional resumido para o agente.
+- **Members:** Alex Oliveira Veras, Jhonatan da Silva Ribeiro, Magno Henrique Souza Cardoso, Moises Henrique da Silva and Taynan Nunes de Araujo.
+- **Theme:** detection of fraud in financial transactions made with credit cards.
+- **Document status:** planning consolidated and implementation in progress. The MVP (E2–E8) was implemented over the base MLG/ULB; the implementation decisions are in [`DECISIONS.md`](DECISIONS.md) and the results come from the pipeline executed on 18/11/2026.
+- **Last updated:** 18/11/2026.
+- **Complementary document:** [`AGENTS.md`](../AGENTS.md), with the summarized operational context for agents.
 
-> **Regra de leitura:** este plano separa explicitamente o que foi **identificado nos materiais**, o que foi **decidido pelo grupo**, o que é **sugestão técnica** e o que ainda é **pendência**. Não trate sugestões como requisitos aprovados. Consulte a Seção 10 antes de tomar decisões de implementação.
+> **Reading rule:** this plan explicitly separates what was **identified in the materials**, what was **decided by the group**, what is **technical suggestion**, and what is still **pending**. Do not treat suggestions as approved requirements. See Section 10 before taking implementation decisions.
 
 ---
 
-## 1. Visão geral
+## 1. Overview
 
-### 1.1 Propósito
+### 1.1 Purpose
 
-Este documento organiza o problema, os requisitos, as bases de dados disponíveis, a fundamentação acadêmica, a arquitetura proposta e a sequência de desenvolvimento do Projeto Integrador do Grupo 54.
+This document organizes the problem, requirements, available data bases, academic foundation, proposed architecture, and the development sequence of the Projeto Integrador do Grupo 54.
 
-Ele deve servir como:
+It must serve as:
 
-- referência única de escopo durante o desenvolvimento;
-- roadmap para acompanhar o avanço de cada etapa;
-- registro das decisões já tomadas e das questões ainda abertas;
-- base para o relatório e para a apresentação final.
+- a single-scope reference during development;
+- a roadmap tracking the progress of each step;
+- a record of decisions taken and open questions;
+- a base for the final report and presentation.
 
-### 1.2 Resumo executivo
+### 1.2 Executive summary
 
-O grupo pretende construir um **dashboard interativo** para analisar transações de cartão de crédito e aplicar **Machine Learning** para identificar padrões associados a fraudes. A proposta está registrada na apresentação do grupo e é compatível, em linhas gerais, com o ciclo de vida de ciência de dados apresentado na aula 2.
+The group intends to build an **interactive dashboard** for analyzing credit card transactions and applying **Machine Learning** to identify patterns associated with fraud. The proposal is recorded in the group presentation and is compatible, in broad terms, with the data science lifecycle presented in Lesson 2.
 
-A principal questão técnica em aberto é a **base de dados**. A apresentação cita a base clássica *Credit Card Fraud Detection* (MLG/ULB), com 284.807 transações e 492 fraudes, e o esboço do dashboard usa números compatíveis com ela. Porém, o link de Kaggle fornecido como “Base 2” aponta para um notebook que utiliza uma base **sintética** diferente, com 10.000 transações e 151 fraudes. Essa divergência precisa ser resolvida pelo grupo antes do desenvolvimento.
+The main technical question open is the **database**. The presentation cites the classic base *Credit Card Fraud Detection* (MLG/ULB), with 284,807 transactions and 492 frauds, and the dashboard sketch uses numbers compatible with it. However, the provided Kaggle link points to a notebook that uses a **synthetic** base, different from it, with 10,000 transactions and 151 frauds. This divergence needs to be resolved by the group before development.
 
-**Recomendação preliminar:** adotar a base clássica MLG/ULB como base principal, por ser a base citada na apresentação, a que sustenta os números do esboço e a que tem maior credibilidade como dado real anonimizado. A base sintética deve ser tratada como alternativa documentada, não como complemento silencioso. A base *Give Me Some Credit* não é adequada ao problema de fraude e deve ser descartada para este escopo.
+**Preliminary recommendation:** adopt the classic MLG/ULB base as the main base, because it is the base cited in the presentation, the one backing the sketch numbers, and the one with the greatest credibility as a real anonymized database. The synthetic base should be treated as a documented alternative, not as a silent supplement. The *Give Me Some Credit* base is not adequate to the fraud problem and should be discarded for this scope.
 
-### 1.3 Legenda de status
+### 1.3 Status legend
 
-| Status | Significado |
+| Status | Meaning |
 |---|---|
-| **Explícito** | Consta diretamente em um material fornecido. |
-| **Esboço** | Aparece no mockup do dashboard, mas não foi formalizado como requisito. |
-| **Recomendado** | Boa prática ou sugestão técnica desta análise; não é exigência acadêmica documentada. |
-| **Pendente** | Depende de decisão do grupo, do professor ou de validação na fonte original. |
+| **Explicit** | Contained directly in a provided material. |
+| **Sketch** | Appears in the dashboard sketch, but not formalized as a requirement. |
+| **Recommended** | Good practice or technical suggestion from this analysis; not an academic requirement. |
+| **Pending** | Depends on a group, professor, or validation with the original source decision. |
 
-### 1.4 Fontes utilizadas
+### 1.4 Sources used
 
-| Código | Fonte | O que foi usado |
+| Code | Source | What was used |
 |---|---|---|
-| **AULA2** | `aula2.pdf` — webconferência “Introdução à Ciência de Dados”, 27 páginas | Ciclo de vida, pré-processamento, EDA, construção de modelos, tipos de aprendizado. |
-| **COD** | `Codigos_Aula2.zip` — `Aula2.ipynb`, `Extra_Aula2.ipynb`, `books.csv`, `dados_populacionais_1000_linhas.csv` | Técnicas de pandas, limpeza, agregação, EDA e visualização com matplotlib/seaborn. |
-| **APRES** | `grupo-54.pptx.pdf` — apresentação do Grupo 54, 12 páginas | Problema, objetivos, escopo, próximos passos, esboço do dashboard e referências. |
-| **GMSC** | Kaggle — *Give Me Some Credit* | Estrutura, variáveis, problema de negócio e limitações. |
-| **CCFD-ULB** | Kaggle — *Credit Card Fraud Detection* (MLG/ULB) | Base clássica de fraude; estrutura, variáveis, distribuição e recomendações de avaliação. |
-| **CCFD-10K** | Kaggle — *Credit Card Fraud Detection Dataset* (`miadul/...`), usado pelo notebook do link fornecido | Base sintética de 10.000 transações; estrutura, variáveis e limitações. |
-| **NILSON** | Nilson Report, edição 1298 / comunicado de janeiro de 2026 | Fonte do dado de perdas globais com fraude de cartões em 2024 (US$ 33,41 bilhões). |
+| **AULA2** | `aula2.pdf` — webconference “Introduction to Data Science”, 27 pages | Lifecycle, preprocessing, EDA, model building, learning types. |
+| **COD** | `Codigos_Aula2.zip` — `Aula2.ipynb`, `Extra_Aula2.ipynb`, `books.csv`, `dados_populacionais_1000_linhas.csv` | Pandas techniques, cleaning, aggregation, EDA and visualization with matplotlib/seaborn. |
+| **APRES** | `grupo-54.pptx.pdf` — Projeto Integrador do Grupo 54 presentation, 12 pages | Problem, objectives, scope, next steps, dashboard sketch, references. |
+| **GMSC** | Kaggle — *Give Me Some Credit* | Structure, variables, business problem and limitations. |
+| **CCFD-ULB** | Kaggle — *Credit Card Fraud Detection* (MLG/ULB) | Classic fraud base; structure, variables, distribution, evaluation recommendations. |
+| **CCFD-10K** | Kaggle — *Credit Card Fraud Detection Dataset* (`miadul/...`), used by the notebook of the provided link | Synthetic base of 10,000 transactions; structure, variables and limitations. |
+| **NILSON** | Nilson Report, edition 1298 / notice of January 2026 | Data on global card fraud losses in 2024 (US$ 33.41 billion). |
 
-**Observação sobre rastreabilidade:** a apresentação cita o dado de US$ 33,41 bilhões sem indicar a fonte. A referência foi localizada no Nilson Report e deve ser incluída no relatório final. Já o link de Kaggle fornecido para a “Base 2” não aponta para a página da base MLG/ULB; ele aponta para um notebook que consome a base sintética `miadul/credit-card-fraud-detection-dataset`. Essa diferença é tratada na Seção 4.
+**Traceability observation:** the presentation cites the data point of US$ 33.41 billion without indicating the source. The reference was located in the Nilson Report and should be included in the final report. The provided Kaggle link for the “Base 2” does not point to the MLG/ULB base page; it points to a notebook that consumes the synthetic base `miadul/credit-card-fraud-detection-dataset`. This discrepancy is treated in Section 4.
 
-**Observação sobre prazos:** o PDF da AULA2 termina com um slide intitulado “CALENDÁRIO”, mas não foi possível extrair dele datas ou conteúdo legível. Nenhum prazo foi assumido neste plano; o cronograma acadêmico precisa ser confirmado com o professor.
-
----
-
-## 2. Problema e objetivos
-
-### 2.1 Contexto de negócio
-
-A apresentação situa o problema no crescimento das perdas globais causadas por fraudes em cartões. O dado citado é de **US$ 33,41 bilhões em 2024** (NILSON). O grupo argumenta que a análise de dados pode:
-
-- reduzir prejuízos ao identificar possíveis fraudes;
-- tornar a detecção mais eficiente com apoio de Machine Learning;
-- revelar características e comportamentos associados a transações fraudulentas;
-- apoiar a análise e a tomada de decisão por meio de um dashboard.
-
-O produto pretendido é, portanto, uma **ferramenta analítica de apoio à decisão**, e não um sistema antifraude de produção com bloqueio automático de transações. Essa distinção é importante para controlar o escopo.
-
-### 2.2 Problema
-
-> Identificar quais transações com cartão de crédito podem se encaixar em casos de fraude, diferenciando-as das transações legítimas e buscando padrões que indiquem possíveis operações fraudulentas.
-
-Fonte: APRES, p. 3.
-
-Em termos técnicos, o problema é uma **classificação binária supervisionada**: prever se uma transação é fraudulenta (`1`) ou legítima (`0`), a partir de atributos históricos rotulados. A base MLG/ULB já possui o rótulo `Class`; a base sintética possui `is_fraud`.
-
-### 2.3 Objetivo geral
-
-Criar um **dashboard interativo** que permita analisar dados de transações com cartão de crédito, compreender suas principais características e comportamentos relacionados a possíveis fraudes, auxiliando na análise preditiva e eficiente, de modo a identificar padrões e características que contribuam para a detecção de fraudes.
-
-Fonte: APRES, p. 4 (paráfrase fiel).
-
-### 2.4 Objetivos específicos
-
-| ID | Objetivo | O que a apresentação indica | Status |
-|---|---|---|---|
-| **OE-1** | Identificar padrões e características das transações fraudulentas | Observar valores, frequência, distribuição e comportamentos fora do comum; usar EDA com gráficos e estatísticas. | Explícito |
-| **OE-2** | Analisar a ocorrência de fraudes de acordo com o valor das transações | Comparar fraudes por faixa de valor e distribuição dos valores. O corpo do slide repete o texto do OE-1; o título, o esboço e os próximos passos confirmam a intenção de analisar valor. | Explícito, com texto duplicado na apresentação |
-| **OE-3** | Analisar a ocorrência de fraudes ao longo do tempo | Gráficos temporais, análise por horário e mapa de calor para identificar períodos com mais ocorrências. | Explícito |
-
-**Pendência de redação:** o texto do OE-2 na apresentação está duplicado com o do OE-1. Antes da entrega, o grupo deve corrigir a redação para descrever claramente a análise por valor. Isso não muda o escopo, mas evita inconsistência no relatório.
-
-### 2.5 Público-alvo
-
-**Não definido explicitamente nos materiais.** A apresentação fala em “auxiliar na análise dos dados” e “facilitar a visualização das informações”, mas não nomeia o usuário do dashboard.
-
-Hipótese de trabalho, **a confirmar**: equipes de análise de risco/fraude e gestores que precisam acompanhar indicadores, investigar padrões e apoiar decisões. Não trate essa hipótese como requisito até que o grupo a valide.
-
-### 2.6 Escopo
-
-**Dentro do escopo identificado:**
-
-- obtenção e preparação de uma base de transações com cartão de crédito;
-- análise exploratória dos dados;
-- análise de padrões de fraude, por valor e ao longo do tempo;
-- aplicação de técnica supervisionada de classificação;
-- avaliação do desempenho do modelo;
-- dashboard interativo com, no mínimo, quatro visualizações;
-- documentação, relatório e apresentação acadêmica.
-
-**Fora do escopo presumido (confirmar):**
-
-- sistema antifraude em produção;
-- integração com adquirentes, emissores ou gateways de pagamento;
-- bloqueio automático de transações;
-- scoring em tempo real ou streaming;
-- uso de dados pessoais identificáveis;
-- inferência causal sobre as causas da fraude;
-- uso conjunto e indiscriminado de bases diferentes;
-- deep learning, aprendizado por reforço ou técnicas não justificadas pelo problema.
-
-### 2.7 Análise cruzada dos materiais
-
-| Pergunta | Constatação | Evidência | Consequência para o plano |
-|---|---|---|---|
-| **1. Quais são os requisitos acadêmicos e técnicos?** | A aula apresenta o ciclo de vida (entender, coletar, pré-processar, EDA, modelar). A apresentação define o produto e cinco próximos passos. Não há enunciado, rubrica, prazos ou formato de entrega nos materiais fornecidos. | AULA2, p. 3–16; APRES, p. 9–11 | O plano segue o ciclo da aula e registra a ausência de requisitos formais como pendência. Não inventar prazos nem critérios de nota. |
-| **2. Quais conceitos das aulas devem ser aplicados?** | Ciclo de vida; limpeza; amostragem; tratamento de desbalanceamento; transformação; EDA; aprendizado supervisionado (classificação/regressão); árvore de decisão; distinção entre supervisionado, não supervisionado e reforço. | AULA2, p. 3–16 | Aplicar o ciclo completo. Para fraude, usar classificação supervisionada. Não usar reforço ou não supervisionado sem justificativa. |
-| **3. Quais técnicas de análise são adequadas?** | Estatísticas descritivas, histogramas, boxplots, dispersão, heatmaps, correlação; limpeza e validação de regras de negócio; agregações; treino/teste; métricas de classificação. | AULA2, p. 12–16; COD, `Aula2.ipynb` | A EDA deve responder aos três objetivos específicos. A modelagem deve comparar um baseline com pelo menos um modelo candidato. |
-| **4. Quais bases fazem sentido?** | MLG/ULB é a base citada na apresentação e compatível com o esboço. A base sintética de 10 mil transações é a usada pelo link fornecido e é mais interpretável, mas não é a base citada. *Give Me Some Credit* é de inadimplência, não de fraude. | APRES, p. 9 e referências; CCFD-ULB; CCFD-10K; GMSC | Decisão pendente entre MLG/ULB e sintética. *Give Me Some Credit* não deve ser usada para o problema atual. |
-| **5. Quais são as limitações e dificuldades?** | Desbalanceamento extremo; atributos anonimizados por PCA na base real; janela de apenas dois dias; ausência de tipo de transação, data absoluta e identificador de cartão na base real; duplicatas; mudança de moeda no esboço; risco de vazamento de dados; poucos positivos. | CCFD-ULB; esboço; análise local | Tratar desbalanceamento e duplicatas explicitamente; não prometer análises que a base não permite; documentar premissas de tempo e moeda. |
-| **6. Quais informações faltam definir?** | Base e versão exatas; público-alvo; ferramenta do dashboard; modelo e métricas; limite de decisão; escopo da aba de predição; formato e prazos das entregas; papéis do grupo; uso ou não da base sintética. | APRES; lacunas dos materiais | Ver Seção 10. Nenhuma dessas decisões deve ser assumida silenciosamente. |
-| **7. Quais entregáveis são necessários?** | Base tratada; EDA; modelo avaliado; dashboard com quatro visualizações; análise de resultados; relatório/apresentação. O formato acadêmico não está especificado. | APRES, p. 9–11 | Ver Seção 11. O código e a documentação devem permitir reproduzir os resultados. |
+**Pacing observation:** the Lesson 2 PDF ends with a slide titled “CALENDÁRIO”, but dates or readable content could not be extracted. No deadlines were assumed in this plan; the academic calendar needs to be confirmed with the professor.
 
 ---
 
-## 3. Requisitos
+## 2. Problem and objectives
 
-### 3.1 Requisitos funcionais
+### 2.1 Business context
 
-| ID | Requisito | Origem | Status | Observações |
+The presentation sets the problem in the growth of global losses caused by card frauds. The cited data is **US$ 33.41 billion in 2024** (NILSON). The group argues that data analysis can:
+
+- reduce losses by identifying potential frauds;
+- make detection more efficient with Machine Learning support;
+- reveal characteristics and behaviors associated with fraudulent transactions;
+- support the analysis and decision-making through a dashboard.
+
+The intended product is therefore an **analytical decision-support tool**, not a production fraud-prevention system with automatic transaction blocking. This distinction is important to control scope.
+
+### 2.2 Problem
+
+> Identify which credit card transactions could fit cases of fraud, distinguishing them from legitimate ones and seeking patterns that indicate possible fraudulent operations.
+
+Source: APRES, p. 3.
+
+In technical terms, the problem is a **binary supervised classification**: predict whether a transaction is fraudulent (`1`) or legitimate (`0`), from labeled historical attributes. The MLG/ULB base already has the label `Class`; the synthetic base has `is_fraud`.
+
+### 2.3 General objective
+
+Create an **interactive dashboard** that allows analyzing credit card transaction data, understanding its main characteristics and behaviors related to frauds, and supporting a predictive and efficient analysis, identifying patterns and characteristics that contribute to fraud detection.
+
+Source: APRES, p. 4 (faithful paraphrase).
+
+### 2.4 Specific objectives
+
+| ID | Objective | What the presentation suggests | Status |
+|---|---|---|---|
+| **OE-1** | Identify patterns and characteristics of fraudulent transactions | Observe values, frequency, distribution, and behaviors out of the ordinary; use EDA with graphs and statistics. | Explicit |
+| **OE-2** | Analyze the occurrence of frauds according to the **value** of transactions | Compare frauds by value band and distribution of values. The slide body repeats the OE-1 text; the title, sketch, and next steps confirm the intent to analyze value. | Explicit, with duplicated text in the presentation |
+| **OE-3** | Analyze the occurrence of frauds over **time** | Time graphs, analysis by time slot, and heatmap to identify periods with more occurrences. | Explicit |
+
+**Pending wording:** the OE-2 slide text in the presentation is duplicated with the OE-1 text. Before delivery, the group must rewrite it to clearly describe the analysis by value. This does not change the scope, but avoids inconsistency in the report.
+
+### 2.5 Target audience
+
+**Not defined explicitly in the materials.** The presentation talks about “supporting the data analysis” and “facilitating information visualization”, but does not name the dashboard user.
+
+Working hypothesis, **to be confirmed**: risk analysis/fraud teams and managers who need to track indicators, investigate patterns, and support decisions. Do not treat this hypothesis as a requirement until the group validates it.
+
+### 2.6 Scope
+
+**In scope identified:**
+
+- obtaining and preparing a credit card transaction base;
+- exploratory data analysis;
+- analysis of fraud patterns by value and over time;
+- application of a supervised classification technique;
+- model performance evaluation;
+- interactive dashboard with at least four visualizations;
+- documentation, report, and academic presentation.
+
+**Presumed out of scope (confirm):**
+
+- production fraud system;
+- integration with acquirers, issuers, or payment gateways;
+- automatic transaction blocking;
+- real-time or streaming scoring;
+- use of identifiable personal data;
+- causal inference on fraud causes;
+- combined indiscriminate use of different bases;
+- deep learning, reinforcement learning, or techniques not justified by the problem.
+
+### 2.7 Cross-analysis of materials
+
+| Question | Finding | Evidence | Consequence for the plan |
+|---|---|---|---|
+| **1. What are the academic and technical requirements?** | The lesson presents the lifecycle (understand, collect, preprocess, EDA, model). The presentation defines the product and five next steps. No syllabus, rubric, deadlines, or delivery format are provided in the materials given. | AULA2, p. 3–16; APRES, p. 9–11 | The plan follows the lesson cycle and records the absence of formal requirements as pending. Do not invent deadlines or grading criteria. |
+| **2. What lesson concepts should be applied?** | Lifecycle; cleaning; sampling; imbalance treatment; transformation; EDA; supervised learning (classification/regression); decision trees; distinction between supervised, unsupervised, and reinforcement learning. | AULA2, p. 3–16 | Apply the complete cycle. For fraud, use supervised classification. Do not use reinforcement learning or unsupervised learning without justification. |
+| **3. What analysis techniques are suitable?** | Descriptive statistics, histograms, boxplots, scatter plots, heatmaps, correlation; cleaning and validation of business rules; aggregations; train/test split; classification performance metrics. | AULA2, p. 12–16; COD, `Aula2.ipynb` | The EDA should answer the three specific objectives. Modeling should compare a baseline with at least one candidate model. |
+| **4. Which bases make sense?** | MLG/ULB is the base cited in the presentation and compatible with the sketch. The 10,000-transaction synthetic base is the one used by the provided link, and is more interpretable, but it is not the cited base. *Give Me Some Credit* is from credit default, not fraud. | APRES, p. 9 and references; CCFD-ULB; CCFD-10K; GMSC | Pending decision between MLG/ULB and the synthetic base. *Give Me Some Credit* should not be used for the current problem. |
+| **5. What are the limitations and difficulties?** | Extreme imbalance; PCA-anonymized attributes in the real base; two-day window; absence of transaction type, absolute date, and card identifier in the real base; duplicates; currency change in the sketch; data leakage risk; few positives. | CCFD-ULB; sketch; local analysis | Treat imbalance and duplicates explicitly; do not promise analyses the base does not support; document time and currency assumptions. |
+| **6. What information is missing to define?** | Exact base and version; target audience; dashboard tool; model and metrics; decision threshold; scope of the prediction tab; format and deadlines of the deliverables; group roles; whether to use the synthetic base. | APRES; material gaps | See Section 10. None of these implementation decisions should be silently assumed. |
+| **7. What deliverables are necessary?** | Treated base; EDA; evaluated model; dashboard with four visualizations; results analysis; report/presentation. Academic format is not specified. | APRES, p. 9–11 | See Section 11. Code and documentation must allow reproducing the results. |
+---
+
+## 3. Requirements
+
+### 3.1 Functional requirements
+
+| ID | Requirement | Source | Status | Notes |
 |---|---|---|---|---|
-| **RF-01** | Selecionar e obter uma base de transações com cartão de crédito no Kaggle. | APRES, p. 9 | Explícito, mas ambíguo | A apresentação cita a base; o link fornecido aponta para uma base sintética diferente. Resolver antes de implementar. |
-| **RF-02** | Realizar limpeza, organização e preparação dos dados, incluindo a criação de indicadores relevantes para a análise de fraudes. | APRES, p. 9 | Explícito | Documentar cada transformação e cada linha removida. |
-| **RF-03** | Identificar padrões e características das transações fraudulentas por meio de EDA. | APRES, p. 5 | Explícito | Usar estatísticas e visualizações; comparar fraudes e não fraudes. |
-| **RF-04** | Analisar a ocorrência de fraudes por faixa de valor. | APRES, p. 5 e 10 | Explícito | Corrigir o texto duplicado do OE-2. Definir faixas e moeda. |
-| **RF-05** | Analisar a ocorrência de fraudes ao longo do tempo, incluindo horários e mapa de calor. | APRES, p. 6 | Explícito | Na base MLG/ULB, o eixo temporal é relativo e cobre dois dias; ver limitação na Seção 4. |
-| **RF-06** | Desenvolver dashboard interativo com, no mínimo, quatro visualizações: indicadores gerais, distribuição de fraudes, fraudes por faixa de valor e evolução temporal. | APRES, p. 10 | Explícito | É o requisito mínimo de produto. O mockup tem quatro abas, mas “quatro visualizações” não significa “quatro abas”. |
-| **RF-07** | Permitir filtros de período, faixa de valor, tipo de transação e status (fraude/normal). | Mockup, p. 10 | Esboço | “Tipo de transação” não existe na base MLG/ULB. Só é viável na base sintética (`merchant_category`) ou após redefinição. |
-| **RF-08** | Aplicar técnica de Machine Learning para identificar padrões suspeitos e prever possíveis fraudes. | APRES, p. 11 | Explícito | Classificação binária supervisionada. O modelo do mockup é Random Forest, mas isso é ilustrativo. |
-| **RF-09** | Avaliar o desempenho do modelo e identificar os principais fatores associados às fraudes. | APRES, p. 11 | Explícito | Métricas adequadas ao desbalanceamento; interpretação compatível com os atributos disponíveis. |
-| **RF-10** | Exibir indicadores gerais (transações, fraudes, taxa e valor movimentado). | Mockup, p. 10 | Esboço | Útil, mas os valores do mockup não são resultados validados. |
-| **RF-11** | Disponibilizar aba de predição com probabilidade, limite de decisão, matriz de confusão e importância das variáveis. | Mockup, p. 10 | Esboço | Confirmar se entra no MVP ou se é apenas ilustração. |
-| **RF-12** | Documentar o processo e permitir reprodução dos resultados. | Recomendado | Recomendado | Não está explícito nos materiais, mas é necessário para defesa acadêmica. |
+| **RF-01** | Select and obtain a credit card transaction base on Kaggle. | APRES, p. 9 | Explicit, ambiguous | The presentation cites the base; the provided link points to a different synthetic base. Resolve before implementation. |
+| **RF-02** | Perform cleaning, organization, and preparation of the data, including the creation of indicators relevant to fraud analysis. | APRES, p. 9 | Explicit | Document each transformation and each line removed. |
+| **RF-03** | Identify patterns and characteristics of fraudulent transactions through EDA. | APRES, p. 5 | Explicit | Use statistics and visualizations; compare frauds and non-frauds. |
+| **RF-04** | Analyze the occurrence of frauds by value band. | APRES, p. 5 and 10 | Explicit | Correct the duplicated OE-2 text. Define bands and currency. |
+| **RF-05** | Analyze the occurrence of frauds over time, including time slots and heatmap. | APRES, p. 6 | Explicit | On the MLG/ULB base, the temporal axis is relative and covers two days; see the limitation in Section 4. |
+| **RF-06** | Develop an interactive dashboard with at least four visualizations: general indicators, fraud distribution, frauds by value band, and temporal evolution. | APRES, p. 10 | Explicit | The minimum product requirement. The sketch has four tabs, but “four visualizations” does not mean “four tabs”. |
+| **RF-07** | Allow filters for period, value band, transaction type, and status (fraud/legitimate). | Sketch, p. 10 | Sketch | “Transaction type” does not exist in the MLG/ULB base. Only feasible in the synthetic base (`merchant_category`) or after redefining it. |
+| **RF-08** | Apply Machine Learning techniques to identify suspicious patterns and predict likely frauds. | APRES, p. 11 | Explicit | Binary supervised classification. The sketch's model is Random Forest, but that is illustrative. |
+| **RF-09** | Evaluate model performance and identify the main factors associated with frauds. | APRES, p. 11 | Explicit | Adequate metrics for imbalance; interpretation compatible with the available attributes. |
+| **RF-10** | Display general indicators (transactions, frauds, rate, and volume moved). | Sketch, p. 10 | Sketch | Useful, but the sketch values are not validated results. |
+| **RF-11** | Provide a prediction tab with probability, decision threshold, confusion matrix, and variable importance. | Sketch, p. 10 | Sketch | Confirm whether it belongs in the MVP or is just illustration. |
+| **RF-12** | Document the process and allow reproducing the results. | Recommended | Recommended | Not explicit in the materials, but necessary for academic defense. |
 
-### 3.2 Requisitos não funcionais
+### 3.2 Non-functional requirements
 
-| ID | Requisito | Status | Critério inicial |
+| ID | Requirement | Status | Initial criterion |
 |---|---|---|---|
-| **RNF-01** | Reprodutibilidade: sementes, versões e pipeline documentados. | Recomendado | Uma pessoa consegue refazer o tratamento, o treino e as principais figuras a partir do README. |
-| **RNF-02** | Desempenho do dashboard: carregar e filtrar sem travar. | Recomendado | Definir meta após protótipo; pré-agregar dados se necessário. |
-| **RNF-03** | Usabilidade: rótulos claros, filtros coerentes, cores consistentes. | Recomendado | Interface do dashboard em **inglês** (KPIs, filtros, gráficos, tabelas, navegação, mensagens e estados vazios/de erro); documentação e código em português (D-09). Valores brutos da base não são traduzidos. |
-| **RNF-04** | Privacidade: não usar dados pessoais identificáveis. | Explícito (base anonimizada) | MLG/ULB é anonimizada; a sintética não contém dados reais. Não tentar reidentificar. |
-| **RNF-05** | Portabilidade: execução local documentada. | Recomendado | Sem dependência obrigatória de nuvem; decidir se haverá deploy. |
-| **RNF-06** | Qualidade de código: Ruff, pytest e tipagem quando fizer sentido. | Recomendado | Manter os comandos existentes do scaffold. |
-| **RNF-07** | Integridade acadêmica: não apresentar números ilustrativos como resultados. | Recomendado | Todo número no relatório deve ter origem rastreável. |
-| **RNF-08** | Consistência: dashboard, notebooks e relatório devem mostrar os mesmos números. | Recomendado | Validar com uma tabela de conferência. |
-| **RNF-09** | Manutenibilidade: separar carregamento, tratamento, modelo e visualização. | Recomendado | Evitar lógica duplicada entre notebook e dashboard. |
-| **RNF-10** | Prazo: entregar dentro do calendário acadêmico. | Pendente | O calendário não foi fornecido; confirmar com o professor. |
+| **RNF-01** | Reproducibility: seeds, versions, and pipeline documented. | Recommended | One person can redo the treatment, training, and main figures from the README. |
+| **RNF-02** | Dashboard performance: loading and filtering without stalling. | Recommended | Set the goal after the prototype; pre-aggregate data if needed. |
+| **RNF-03** | Usability: clear labels, coherent filters, consistent colors. | Recommended | Dashboard interface in **pt-BR** (KPIs, filters, graphs, tables, navigation, messages, empty/error states); code and documentation in English (D-09). Raw base values are not translated. |
+| **RNF-04** | Privacy: no identifiable personal data. | Explicit (base is anonymized) | MLG/ULB is anonymized; the synthetic base contains no real data. Do not attempt re-identification. |
+| **RNF-05** | Portability: documented local execution. | Recommended | No mandatory cloud dependency; decide whether to deploy later. |
+| **RNF-06** | Code quality: Ruff, pytest, and typing when it makes sense. | Recommended | Keep the scaffold's existing commands. |
+| **RNF-07** | Academic integrity: do not present illustrative numbers as results. | Recommended | All numbers in the report have traceable origins. |
+| **RNF-08** | Consistency: dashboard, notebooks, and reports must show the same numbers. | Recommended | Validate against a reconciliation table. |
+| **RNF-09** | Maintainability: separate loading, treatment, modeling, and visualization. | Recommended | Avoid duplicated logic between notebook and dashboard. |
+| **RNF-10** | Deadline: deliver within the academic calendar. | Pending | The calendar was not provided; confirm with the professor. |
 
-### 3.3 O que não é requisito
+### 3.3 What is not a requirement
 
-Os itens abaixo aparecem no esboço ou no contexto, mas **não** devem ser tratados como requisitos aprovados:
+The following items appear in the sketch or context, but **must not** be treated as approved requirements:
 
-- os valores exatos do mockup (284.907 transações, R$ 25 Mi, 70% das fraudes abaixo de R$ 250);
-- as métricas 99% / 94% / 92% / 93% e a matriz de confusão do mockup;
-- a importância das variáveis V14, V10 e V17;
-- a existência de uma aba de predição pronta para uso operacional;
-- o filtro “tipo de transação” na base MLG/ULB;
-- o período “01/01/2024 a 30/04/2025”;
-- o bloqueio automático de transações.
+- the sketch's exact values (284,907 transactions, R$ 25 million, 70% of frauds below R$ 250);
+- the sketch's 99% / 94% / 92% / 93% metrics and its confusion matrix;
+- the sketch's variable importance for V14, V10, and V17;
+- the existence of an operational prediction tab ready to use;
+- the “transaction type” filter in the MLG/ULB base;
+- the period “01/01/2024 to 30/04/2025”;
+- automatic transaction blocking.
 
-O Apêndice A compara esses itens com a base real e explica as inconsistências.
+Appendix A compares these items against the real base and explains the inconsistencies.
 
 ---
 
-## 4. Análise das bases de dados
+## 4. Database bases analysis
 
 ### 4.1 Base 1 — Give Me Some Credit
 
-**Origem:** competição histórica do Kaggle. **Problema:** prever inadimplência grave — pessoa que ficou 90 dias ou mais em atraso — em um horizonte de dois anos.
+**Origin:** classic Kaggle competition. **Problem:** predict serious default — a person 90+ days overdue on any debt — within a two-year horizon.
 
-**Estrutura conhecida:**
+**Known structure:**
 
-- 150.000 registros de treino e 101.503 registros de teste;
-- 10 variáveis explicativas e 1 variável-alvo (`SeriousDlqin2yrs`);
-- variáveis sobre utilização de crédito rotativo, idade, atrasos, dívida, renda mensal, linhas de crédito abertas, empréstimos imobiliários e dependentes;
-- valores ausentes conhecidos em `MonthlyIncome` e `NumberOfDependents`;
-- valores-sentinela e extremos conhecidos nas contagens de atraso (por exemplo, 96 e 98) e em `RevolvingUtilizationOfUnsecuredLines`;
-- alvo desbalanceado, com aproximadamente 6,7% de positivos na base de treino.
+- 150,000 training records + 101,503 test records;
+- 10 explanatory variables and 1 target variable (`SeriousDlqin2yrs`);
+- variables on use of rotating credit, age, defaults, debts, monthly income, open credit lines, mortgages, and dependents;
+- known missing values in `MonthlyIncome` and `NumberOfDependents`;
+- known sentinel and extreme values in default counts (for example 96 and 98) and `RevolvingUtilizationOfUnsecuredLines`;
+- imbalanced target, about 6.7% positives in the training base.
 
-**Adequação ao projeto:** **baixa**. A base é de **risco de crédito**, não de fraude. Ela não contém transações, valor de compra, comerciante, dispositivo, horário ou rótulo de fraude. Também não há chave para cruzá-la com as bases de fraude. Usá-la exigiria mudar o problema do grupo.
+**Fit to the project:** **low**. The base is a **credit default risk** problem, not fraud. It has no transactions, purchase amounts, merchants, devices, time slots, or fraud labels. There is also no key to cross-reference with the fraud bases. Using it would change the group's problem.
 
-**Possibilidades:** seria adequada a um projeto de scoring de crédito, com regressão logística ou árvores e avaliação por AUC. Não é o caso deste projeto.
+**Possibilities:** would be suitable for a credit scoring project with logistic regression or trees, evaluated with AUC. Not the case for this project.
 
-**Recomendação:** não utilizar. Registrar no relatório como base avaliada e descartada, com justificativa.
+**Recommendation:** do not use. Record in the report as an evaluated and discarded base, with justification.
 
 ### 4.2 Base 2 — Credit Card Fraud Detection (MLG/ULB)
 
-**Origem:** colaboração entre Worldline e o Machine Learning Group da Université Libre de Bruxelles (ULB). É a base citada na apresentação e a que corresponde ao esboço do dashboard.
+**Origin:** collaboration between Worldline and the Machine Learning Group of Université Libre de Bruxelles (ULB). It is the base cited in the presentation and corresponds to the dashboard sketch.
 
-**Estrutura conhecida:**
+**Known structure:**
 
-- 284.807 transações;
-- 31 colunas: `Time`, `V1` a `V28`, `Amount` e `Class`;
-- 492 fraudes, ou 0,1727% das transações;
-- transações de cartões europeus, em setembro de 2013, ao longo de dois dias;
-- `Time`: segundos decorridos desde a primeira transação da base;
-- `V1` a `V28`: componentes principais obtidos por PCA; o significado original não foi divulgado por confidencialidade;
-- `Amount`: valor da transação;
-- `Class`: 1 para fraude, 0 para transação legítima;
-- sem valores ausentes;
-- recomendação oficial de avaliação: **AUPRC** (área sob a curva precisão-recall), porque a acurácia é enganosa em bases desbalanceadas.
+- 284,807 transactions;
+- 31 columns: `Time`, `V1` to `V28`, `Amount`, `Class`;
+- 492 frauds, or 0.1727% of transactions;
+- European card transactions in September 2013, over two days;
+- `Time`: seconds since the first transaction in the base;
+- `V1` to `V28`: principal components obtained by PCA; the original meaning was not disclosed due to confidentiality;
+- `Amount`: transaction amount;
+- `Class`: 1 for fraud, 0 for legitimate transactions;
+- no missing values;
+- official evaluation recommendation: **AUPRC** (area under the precision-recall curve), because accuracy is misleading on imbalanced bases.
 
-**Verificação local realizada em 17/11/2026** (arquivo público `creditcard.csv`, sem versionamento no repositório):
+**Local verification actually performed on 17/11/2026** (public file `creditcard.csv`, not versioned in the repository):
 
-| Verificação | Resultado |
+| Verification | Result |
 |---|---|
-| Linhas | 284.807 |
-| Colunas | 31 |
-| Fraudes | 492 (0,1727%) |
-| Valores ausentes | 0 |
-| Duplicatas exatas | 1.081 linhas, das quais 19 são fraudes |
-| `Time` | 0 a 172.792 segundos (≈ 2 dias) |
-| `Amount` total | 25.162.590,01 (unidade original: moeda europeia; o dicionário não fixa “euros”) |
-| `Amount` mínimo / máximo | 0,00 / 25.691,16 |
-| Transações com valor zero | 1.825, das quais 27 são fraudes |
-| Mediana de `Amount` | 22,00 em todas as transações; 9,25 entre as fraudes |
+| Rows | 284,807 |
+| Columns | 31 |
+| Frauds | 492 (0.1727%) |
+| Missing values | 0 |
+| Exact duplicates | 1,081 rows, of which 19 are frauds |
+| `Time` | 0 to 172,792 seconds (about 2 days) |
+| `Amount` total | 25,162,590.01 (original unit; the dictionary does not fix “euros”) |
+| `Amount` min / max | 0.00 / 25,691.16 |
+| Transactions with `Amount` = 0 | 1,825, of which 27 are frauds |
+| Median of `Amount` | 22.00 in all transactions; 9.25 in frauds |
 
-**Pontos fortes:**
+**Strengths:**
 
-- dado real anonimizado, com rótulo de fraude;
-- base de referência mundial, com literatura e benchmarks;
-- compatível com a apresentação, com o esboço e com os números 284.807 / 492 / 0,17%;
-- permite classificação binária e avaliação por precision, recall, F1, AUPRC e matriz de confusão.
+- real anonymized data with a fraud label;
+- world-reference base, with literature and benchmarks;
+- compatible with the presentation, the sketch, and the numbers 284,807 / 492 / 0.17%;
+- allows binary classification and evaluation by precision, recall, F1, AUPRC, and confusion matrix.
 
-**Limitações:**
+**Limitations:**
 
-- atributos anonimizados por PCA: não é possível nomear os fatores de negócio por trás de V1–V28;
-- apenas dois dias: não há sazonalidade, tendência de longo prazo ou datas absolutas;
-- `Time` é relativo; a origem não é documentada como meia-noite, então “hora do dia” exige uma premissa;
-- não há identificador de cartão, comerciante, categoria, dispositivo ou tipo de transação;
-- desbalanceamento extremo (492 positivos);
-- 1.081 duplicatas exatas, incluindo 19 fraudes: removê-las altera a classe positiva;
-- risco de vazamento se transformações forem ajustadas antes da separação treino/teste.
+- PCA-anonymized attributes: business factors behind V1–V28 cannot be named;
+- only two days: no seasonality, long-term trend, or absolute dates;
+- `Time` is relative; the origin is not documented as midnight, so “time of day” requires a premise;
+- no card, merchant, category, device, or transaction type identifier;
+- extreme imbalance (492 positives);
+- 1,081 exact duplicates, including 19 frauds: removing them changes the positive class;
+- data leakage risk if transformations are fitted before the train/test split.
 
-**Adequação:** **alta**, desde que as limitações sejam assumidas e o dashboard não prometa análises que a base não permite.
+**Fit:** **high**, provided the limitations are assumed and the dashboard does not promise analyses the base does not allow.
 
-### 4.3 Base fornecida no link “Credit Card Fraud Detection Dataset” (sintética, 10 mil)
+### 4.3 Base provided through the “Credit Card Fraud Detection Dataset” link (synthetic, 10,000)
 
-**Origem:** conjunto `miadul/credit-card-fraud-detection-dataset`, no Kaggle, usado pelo notebook indicado no link fornecido. O título é parecido com o da base clássica, mas o conteúdo é diferente.
+**Origin:** `miadul/credit-card-fraud-detection-dataset` on Kaggle, used by the notebook indicated in the provided link. The title is similar to the classic base's, but the content is different.
 
-**Estrutura conhecida:**
+**Known structure:**
 
-- 10.000 transações sintéticas;
-- 10 colunas: `transaction_id`, `amount`, `transaction_hour`, `merchant_category`, `foreign_transaction`, `location_mismatch`, `device_trust_score`, `velocity_last_24h`, `cardholder_age`, `is_fraud`;
-- alvo `is_fraud`;
-- a página da base declara distribuição “altamente desbalanceada (fraude ≈ 4–5%)”;
-- a inspeção do arquivo público em 17/11/2026 encontrou **151 fraudes em 10.000 linhas (1,51%)**, e não 4–5%;
-- sem valores ausentes e sem duplicatas exatas na inspeção;
-- 24 valores de hora (0–23), 5 categorias de comerciante, `foreign_transaction` e `location_mismatch` binários, `device_trust_score` declarado de 0 a 100 (no arquivo, 25 a 99), `velocity_last_24h` de 0 a 9;
-- `amount` entre 0,00 e 1.471,04 na inspeção;
-- base declarada como sintética, com licença Apache 2.0, criada em dezembro de 2025.
+- 10,000 synthetic transactions;
+- 10 columns: `transaction_id`, `amount`, `transaction_hour`, `merchant_category`, `foreign_transaction`, `location_mismatch`, `device_trust_score`, `velocity_last_24h`, `cardholder_age`, `is_fraud`;
+- target `is_fraud`;
+- the base page declares “highly imbalanced (fraud around 4–5%)” distribution;
+- file-level inspection on 17/11/2026 found **151 frauds in 10,000 lines (1.51%)**, not 4–5%;
+- no missing values and no exact duplicates on inspection;
+- 24 hour values (0–23), 5 merchant categories, `foreign_transaction` and `location_mismatch` binary, `device_trust_score` declared 0 to 100 (file has 25 to 99), `velocity_last_24h` from 0 to 9;
+- `amount` between 0.00 and 1,471.04 on inspection;
+- base declared synthetic, Apache 2.0 license, created in December 2025.
 
-**Pontos fortes:**
+**Strengths:**
 
-- atributos interpretáveis e diretamente ligados ao esboço: valor, hora, categoria de comerciante, transação internacional, incompatibilidade de localização, confiança do dispositivo, velocidade e idade;
-- permite o filtro “tipo de transação” se `merchant_category` for usado como categoria;
-- base pequena, rápida e fácil de explicar;
-- permite construir o dashboard e demonstrar o fluxo completo sem depender de PCA.
+- interpretable attributes directly linked to the sketch: value, time, merchant category, international transaction, location mismatch, device trust, speed, age;
+- enables the “transaction type” filter if `merchant_category` is used as category;
+- small, fast, and easy to explain;
+- allows building the dashboard and demonstrating the complete flow without depending on PCA.
 
-**Limitações:**
+**Limitations:**
 
-- é **sintética**: não representa fraude real e não sustenta afirmações sobre o mundo;
-- tem apenas 151 fraudes, o que limita a estabilidade das métricas;
-- a própria página da base informa uma taxa de fraude que não corresponde ao arquivo;
-- não é a base citada na apresentação nem a base do esboço;
-- não há datas absolutas; a moeda não está claramente definida;
-- a origem e o processo de geração não estão documentados em detalhe;
-- usar essa base sem atualizar a apresentação criaria uma inconsistência acadêmica.
+- it is **synthetic**: does not represent real fraud and must not support claims about the world;
+- only 151 frauds, limiting metric stability;
+- the base's own page reports a fraud rate that does not match the file;
+- not the base cited in the presentation and not the sketch base;
+- no absolute dates; currency not clearly defined;
+- origin and generation process not documented in detail;
+- using this base without updating the presentation would cause an academic inconsistency.
 
-**Adequação:** **média como alternativa**, alta para prototipagem e para um dashboard interpretável, baixa para afirmações sobre fraude real.
+**Fit:** **medium as a documented alternative**, high for prototyping and an interpretable dashboard, low for claims about real fraud.
 
-### 4.4 Comparação
+### 4.4 Comparison
 
-| Critério | Give Me Some Credit | MLG/ULB | Sintética 10K |
+| Criterion | Give Me Some Credit | MLG/ULB | Synthetic 10K |
 |---|---|---|---|
-| Problema | Inadimplência / risco de crédito | Fraude em cartão | Fraude em cartão |
-| Unidade | Pessoa / crédito | Transação | Transação |
-| Registros | 150.000 treino + 101.503 teste | 284.807 | 10.000 |
-| Variáveis | 10 + alvo | 30 + alvo | 9 + alvo |
-| Alvo | `SeriousDlqin2yrs` | `Class` | `is_fraud` |
-| Positivos | ≈ 6,7% | 0,1727% (492) | 1,51% (151) |
-| Interpretabilidade | Alta | Baixa (PCA) | Alta |
-| Análise temporal | Não | Limitada a 2 dias relativos | Hora do dia (0–23) |
-| Tipo de transação | Não | Não | `merchant_category` |
-| Data absoluta | Não | Não | Não |
-| Adequação ao escopo | Baixa | Alta, com ressalvas | Média, se assumida como sintética |
-| Papel recomendado | Descartar | Base principal | Alternativa documentada |
+| Problem | Default / credit risk | Credit card fraud | Credit card fraud |
+| Unit | Person / credit | Transaction | Transaction |
+| Records | 150,000 training + 101,503 test | 284,807 | 10,000 |
+| Variables | 10 + target | 30 + target | 9 + target |
+| Target | `SeriousDlqin2yrs` | `Class` | `is_fraud` |
+| Positives | approx. 6.7% | 0.1727% (492) | 1.51% (151) |
+| Interpretability | High | Low (PCA) | High |
+| Temporal analysis | No | Limited to 2 relative days | Time of day (0–23) |
+| Transaction type | No | No | `merchant_category` |
+| Absolute date | No | No | No |
+| Fit to scope | Low | High, with caveats | Medium, assuming synthetic |
+| Recommended role | Discard | Main base | Documented alternative |
 
-### 4.5 Recomendação sobre as bases
+### 4.5 Recommendation on bases
 
-1. **Base principal recomendada: MLG/ULB.** É a base registrada na apresentação, a que aparece nas referências e a que explica os números do esboço. Também é a mais defensável academicamente como dado real anonimizado.
-2. **Não usar *Give Me Some Credit*.** Ela não responde ao problema de fraude e não tem relação com as transações.
-3. **Não misturar as bases.** Se a sintética for usada, ela deve ser um estudo separado ou um protótipo claramente rotulado, não uma extensão dos resultados da base real.
-4. **Decisão do grupo necessária.** Se a prioridade for explicabilidade de negócio e o filtro “tipo de transação”, a base sintética é mais adequada — mas o grupo precisa atualizar o escopo, a apresentação e as referências, e deixar claro que os achados são de dados sintéticos.
-5. **Se a base MLG/ULB for mantida:** remover ou redefinir o filtro “tipo de transação”; tratar a análise temporal como relativa aos dois dias; não usar “R$” sem justificar a moeda; e explicar que os fatores são componentes PCA, não variáveis de negócio.
+1. **Recommended main base: MLG/ULB.** It is the base recorded in the presentation, appears in the references, and explains the sketch numbers. It is also the most defensible in academia as a real anonymized database.
+2. **Do not use *Give Me Some Credit*.** It does not address the fraud problem and has no relationship to transactions.
+3. **Do not mix bases.** If the synthetic base is used, it must be a separate study or a clearly labeled prototype, not an extension of the real base results.
+4. **Group decision required.** If the priority is business interpretability and the “transaction type” filter, the synthetic base is more suitable — but the group must update the scope, presentation, and references, and make clear the findings are on synthetic data.
+5. **If MLG/ULB is maintained:** remove or redefine the “transaction type” filter; treat the temporal analysis as relative to the two days; do not use “R$” without justifying the currency; and explain that the factors are PCA components, not business variables.
 
-### 4.6 Cuidados obrigatórios de tratamento
+### 4.6 Mandatory treatment care
 
-- **Duplicatas:** decidir e documentar. Na MLG/ULB, remover todas as duplicatas elimina 19 fraudes. Se forem mantidas, explicar por que; se forem removidas, registrar o impacto na classe positiva.
-- **Valores ausentes:** verificar na base escolhida; a MLG/ULB não tem nulos, a sintética também não na inspeção. Ainda assim, o pipeline deve tratar nulos.
-- **Outliers:** não remover automaticamente. Fraudes podem estar justamente nos extremos. Investigar e documentar.
-- **Desbalanceamento:** tratar apenas no treino (pesos de classe, undersampling ou oversampling). Nunca aplicar SMOTE antes da separação treino/teste.
-- **Vazamento:** separar treino/teste antes de ajustar escalonamento, imputação, seleção de atributos ou resampling.
-- **Tempo:** na MLG/ULB, `Time` não é data absoluta. Se for derivar “hora do dia”, declarar a premissa e testar a sensibilidade; caso contrário, analisar blocos de horas decorridas.
-- **Moeda:** a MLG/ULB é de cartões europeus e o dicionário não fixa “euros” explicitamente. O esboço usa “R$”. Corrigir rótulos ou justificar a conversão; não converter sem fonte.
-- **Escalas:** `Amount` e `Time` têm escalas muito diferentes das componentes PCA. Modelos sensíveis a escala precisam de padronização; árvores não precisam, mas o pipeline deve ser consistente.
-- **Poucos positivos:** evitar conclusões definitivas a partir de subgrupos com poucos casos. Usar validação cruzada e reportar incerteza quando possível.
+- **Duplicates:** decide and document. On MLG/ULB, removing all duplicates eliminates 19 frauds. If maintained, explain why; if removed, record the impact on the positive class.
+- **Missing values:** check on the chosen base; MLG/ULB has no nulls and the synthetic one none either, by inspection. Even so, the pipeline must handle nulls.
+- **Outliers:** do not remove automatically. Frauds may be exactly at the extremes. Investigate and document.
+- **Imbalance:** treat only in training (class weights, undersampling, or oversampling). Never apply SMOTE before the train/test split.
+- **Leakage:** split train/test before fitting scaling, imputation, attribute selection, or resampling.
+- **Time:** on MLG/ULB, `Time` is not an absolute date. If deriving “time of day”, state the premise and test sensitivity; otherwise analyze hour blocks relative to elapsed time.
+- **Currency:** MLG/ULB is European card and the dictionary does not fix “euros” explicitly. The sketch uses “R$”. Correct labels or justify conversion; do not convert without a source.
+- **Scales:** `Amount` and `Time` have scales very different from the PCA components. Scale-sensitive models need standardization; trees do not, but the pipeline must be consistent.
+- **Few positives:** avoid definitive conclusions from subgroups with few cases. Use cross-validation and report uncertainty when possible.
 
-**Onde inserir os arquivos:** a área `data/` já está preparada. Consulte `data/README.md` para os nomes esperados (`data/raw/creditcard.csv`, `data/raw/credit_card_fraud_10k.csv` ou `data/raw/cs-training.csv`), os links e as regras de não versionamento. Coloque apenas a base escolhida.
+**Where to place files:** the `data/` area is already prepared. See `data/README.md` for the expected names (`data/raw/creditcard.csv`, `data/raw/credit_card_fraud_10k.csv`, or `data/raw/cs-training.csv`), links, and no-versioning rules. Place only the chosen base.
 
 ---
 
-## 5. Fundamentação técnica e acadêmica
+## 5. Technical and academic foundation
 
-### 5.1 Ciclo de vida da aula 2
+### 5.1 Lesson 2 lifecycle
 
-A AULA2 apresenta cinco etapas: **entender o problema → coleta de dados → pré-processamento → análise exploratória → construção de modelos**. O plano abaixo preserva essa lógica e desdobra a construção de modelos em preparação de atributos, treino e avaliação, porque são dependências reais.
+Lesson 2 presents five stages: **understand the problem → data collection → preprocessing → exploratory data analysis → model construction**. The plan below preserves this logic and expands model construction into attribute preparation, training, and evaluation, because they are real dependencies.
 
-| Etapa da AULA2 | O que a aula destaca | Como será aplicada |
+| Lesson 2 stage | What the lesson highlights | How it is applied |
 |---|---|---|
-| Entender o problema | Definir o problema antes de modelar | Seção 2 e decisão de escopo (E1) |
-| Coleta de dados | Obter e conhecer a base | Aquisição, licença e dicionário (E2) |
-| Pré-processamento | Limpeza, amostragem, desbalanceamento, transformação | Auditoria e limpeza (E3) e preparação final (E5) |
-| EDA | Examinar, resumir e visualizar; orientar variáveis, transformações e modelo | EDA dos três objetivos (E4) |
-| Construção de modelos | Aprender padrões e gerar previsões/explicações | Treino (E6) e avaliação (E7) |
+| Understand the problem | Define the problem before modeling | Section 2 and scope decisions (E1) |
+| Data collection | Obtain and know the base | Acquisition, license, and dictionary (E2) |
+| Preprocessing | Cleaning, sampling, imbalance, transformation | Audit and cleaning (E3) and final preparation (E5) |
+| EDA | Inspect, summarize, and visualize; guide variables, transformations, and models | EDA of the three objectives (E4) |
+| Model construction | Learn patterns and generate predictions/explanations | Training (E6) and evaluation (E7) |
 
-### 5.2 Pré-processamento
+### 5.2 Preprocessing
 
-A AULA2 define quatro frentes:
+Lesson 2 defines four fronts:
 
-- **Limpeza:** remover ou tratar valores ausentes, duplicados e inconsistentes. No projeto, isso inclui validar faixas, detectar duplicatas e registrar remoções.
-- **Amostragem:** selecionar subconjuntos representativos. No projeto, o uso principal é a separação treino/teste estratificada; amostragem adicional só se necessária para experimentos.
-- **Desbalanceamento:** prevenir modelos tendenciosos. No projeto, isso é central: 0,1727% de fraudes na MLG/ULB e 1,51% na sintética.
-- **Transformação:** normalizar, padronizar e codificar. No projeto, aplicar a `Amount`, `Time` e variáveis categóricas da sintética; as V1–V28 já são componentes PCA.
+- **Cleaning:** remove or treat missing values, duplicates, and inconsistent values. In this project, includes validating ranges, detecting duplicates, and recording removals.
+- **Sampling:** select representative subsets. In the project, the main use is the stratified train/test split; additional sampling only if necessary for experiments.
+- **Imbalance:** prevent biased models. In the project, this is central: 0.1727% frauds on MLG/ULB and 1.51% on the synthetic base.
+- **Transformation:** normalize, standardize, and encode. In the project, apply `Amount`, `Time`, and the categorical variables of the synthetic base; V1–V28 are already PCA components.
 
-### 5.3 Análise exploratória
+### 5.3 Exploratory data analysis
 
-A AULA2 indica que a EDA deve responder:
+Lesson 2 indicates that EDA should answer:
 
-- como os dados estão distribuídos;
-- se existem padrões ou tendências;
-- se há relações entre variáveis;
-- se existem outliers ou comportamentos inesperados.
+- how the data is distributed;
+- whether there are patterns or trends;
+- whether there are relationships between variables;
+- whether there are outliers or unexpected behavior.
 
-Técnicas indicadas: estatísticas descritivas (média, mediana, desvio padrão), visualizações (histogramas, boxplots, dispersão, heatmaps) e análise de correlação.
+Recommended techniques: descriptive statistics (mean, median, standard deviation), visualizations (histograms, boxplots, scatter plots, heatmaps) and correlation analysis.
 
-No projeto, a EDA deve produzir evidências para:
+In the project, EDA must produce evidence for:
 
-- **OE-1:** comparação entre fraudes e não fraudes; distribuições; frequência; outliers; correlações.
-- **OE-2:** valores e faixas de valor; proporção de fraudes por faixa; cuidado com a assimetria de `Amount`.
-- **OE-3:** distribuição temporal; hora/bloco de hora; heatmap; limitações da janela de dois dias.
+- **OE-1:** frauds vs non-frauds; distributions; frequency; outliers; correlations.
+- **OE-2:** values and value bands; proportion of frauds by band; care with the `Amount` asymmetry.
+- **OE-3:** temporal distribution; time of day/hour block; heatmap; limitations of the two-day window.
 
-### 5.4 Construção de modelos
+### 5.4 Model construction
 
-A AULA2 diferencia:
+Lesson 2 distinguishes:
 
-- **aprendizado supervisionado:** dados rotulados; classificação e regressão; exemplo de árvore de decisão;
-- **não supervisionado:** busca de padrões por agrupamento e associação;
-- **reforço:** aprende com erros, valor e política.
+- **supervised:** labeled data; classification and regression; decision tree example;
+- **unsupervised:** search of patterns by clustering and association;
+- **reinforcement:** learns from errors, reward, and policy.
 
-Para este projeto, o problema tem rótulo binário e objetivo preditivo. Portanto, a abordagem principal é **classificação supervisionada**. Técnicas não supervisionadas podem ser estudadas como complemento, mas não são necessárias para cumprir o escopo. Reforço não se aplica ao problema e não deve ser adicionado.
+For this project, the problem has a binary label and a predictive objective. Therefore, the main approach is **supervised classification**. Unsupervised techniques can be studied as a complement, but they are not necessary to fulfill the scope. Reinforcement learning does not apply and must not be added.
 
-Candidatos razoáveis, a comparar:
+Reasonable candidate models, to compare:
 
-- **baseline:** regressão logística ou árvore de decisão simples, para estabelecer referência;
-- **modelo principal:** Random Forest, Gradient Boosting ou outro ensemble de árvores;
-- **opcional:** ajuste de limite de decisão e pesos de classe;
-- **opcional:** regras de risco simples, como no notebook da base sintética, apenas como baseline interpretável.
+- **baseline:** logistic regression or a simple decision tree, to establish reference;
+- **main model:** Random Forest, Gradient Boosting, or another tree ensemble;
+- **optional:** decision threshold adjustment and class weights;
+- **optional:** simple risk rules, as in the synthetic base notebook, only as an interpretable baseline.
 
-O mockup mostra “Random Forest”, mas isso é uma ilustração. A escolha final deve ser justificada por desempenho, interpretabilidade e simplicidade, não pelo desenho.
+The sketch shows “Random Forest”, but that is an illustration. The final choice must be justified by performance, interpretability, and simplicity, not by the design.
 
-### 5.5 Técnicas observadas nos notebooks da aula
+### 5.5 Techniques observed in lesson notebooks
 
-O `Aula2.ipynb` demonstra um fluxo completo com pandas:
+`Aula2.ipynb` demonstrates a complete flow with pandas:
 
-- leitura de CSV e inspeção (`head`, `sample`, `info`);
-- verificação de nulos, descrição estatística e duplicatas;
-- validação de regras de negócio (por exemplo, contagem de avaliações menor que contagem de comentários);
-- remoção de colunas, renomeação, filtros e reset de índice;
-- conversão de datas e tratamento de datas inválidas;
-- agrupamento e agregação (`groupby`, `agg`);
-- junção de tabelas (`merge`) e explosão de listas (`explode`);
-- visualizações com matplotlib e seaborn (barplot, violinplot).
+- CSV reading and inspection (`head`, `sample`, `info`);
+- null checks, descriptive statistics, and duplicates;
+- validation of business rules (for example, count of ratings smaller than count of comments);
+- column removal, rename, filtering, and index reset;
+- date conversion and treatment of invalid dates;
+- grouping and aggregation (`groupby`, `agg`);
+- table joins (`merge`) and list explosion (`explode`);
+- visualizations with matplotlib and seaborn (barplot, violinplot).
 
-O `Extra_Aula2.ipynb` acrescenta:
+`Extra_Aula2.ipynb` adds:
 
-- `value_counts` para faixas etárias, profissões e estados;
-- gráficos de barras, barras horizontais e pizza;
-- títulos e rótulos.
+- `value_counts` for age bands, professions, and states;
+- bar and horizontal bar charts, and pie charts;
+- titles and labels.
 
-A AULA2 também apresenta o **Google Colab** como ambiente das práticas. O projeto pode usar Colab ou ambiente local, desde que a execução seja documentada e os resultados possam ser reproduzidos. Para o dashboard, a execução local tende a ser mais simples de demonstrar.
+Lesson 2 also presents the **Google Colab** environment as the practices environment. The project can use Colab or local environment, as long as execution is documented and results can be reproduced. For the dashboard, local execution tends to be simpler to demonstrate.
 
-**Como usar:** esses notebooks são referência de nível técnico e de estilo, não um molde a copiar. O projeto deve adaptar as técnicas ao problema de fraude e manter o código reproduzível.
+**How to use:** these notebooks are technical reference and style level, not a mold to copy. The project should adapt the techniques to the fraud problem and maintain reproducible code.
 
-### 5.6 Avaliação
+### 5.6 Evaluation
 
-A base MLG/ULB recomenda **AUPRC** por causa do desbalanceamento. O plano adota:
+MLG/ULB recommends **AUPRC** because of the imbalance. The plan adopts:
 
-- **AUPRC** como métrica principal de ranking;
-- **precision, recall e F1** para a classe fraude;
-- **matriz de confusão**;
-- **ROC-AUC** como métrica complementar;
-- **acurácia** apenas como contextualização, nunca como métrica principal;
-- **limite de decisão** explícito, com discussão do trade-off entre falsos positivos e falsos negativos;
-- **validação cruzada** no treino e **holdout** para a avaliação final.
+- **AUPRC** as the main ranking metric;
+- **precision, recall, and F1** for the fraud class;
+- **confusion matrix**;
+- **ROC-AUC** as a complementary metric;
+- **accuracy** only as context, never as the main metric;
+- an **explicit decision threshold**, with discussion of the trade-off between false positives and false negatives;
+- **cross-validation** in training and **holdout** for final evaluation.
 
-Não definir metas numéricas arbitrárias antes de treinar o baseline. O critério inicial deve ser: o modelo precisa ser melhor que o baseline em AUPRC e apresentar recall/precision compatíveis com o limite escolhido, com justificativa de negócio.
+Do not define arbitrary numerical goals before training the baseline. The initial criterion: the model must be better than baseline on AUPRC and show recall/precision compatible with the chosen threshold, with business justification.
 
-### 5.7 Rigor acadêmico
+### 5.7 Academic rigor
 
-- Toda afirmação sobre fraude deve indicar a base e a limitação.
-- Resultados da base sintética não podem ser apresentados como evidência de fraude real.
-- Números do mockup não podem ser reaproveitados sem recálculo.
-- Citações devem seguir o padrão solicitado pela instituição (provavelmente ABNT; confirmar).
-- O relatório deve registrar decisões, transformações, métricas, limitações e alternativas descartadas.
-- Se forem usadas ferramentas de IA, seguir a política da instituição e declarar o uso quando exigido.
+- Every fraud claim must indicate the base and limitation.
+- Synthetic base results cannot be presented as evidence of real fraud.
+- Skew numbers from the sketch cannot be reused without recomputation.
+- Citations must follow the format requested by the institution (probably ABNT; confirm).
+- The report must record decisions, transformations, metrics, limitations, and discarded alternatives.
+- If AI tools are used, follow the institution's policy and declare usage when required.
 
 ---
 
-## 6. Arquitetura e organização proposta
+## 6. Architecture and organization
 
-### 6.1 Princípios
+### 6.1 Principles
 
-- **Simplicidade:** um projeto acadêmico não precisa de arquitetura de produção.
-- **Reprodutibilidade:** qualquer pessoa deve conseguir refazer o fluxo.
-- **Separação de responsabilidades:** dados, features, modelo, visualização e dashboard não devem ficar misturados.
-- **Rastreabilidade:** cada número do dashboard deve vir de um artefato gerado pelo pipeline.
-- **Escopo controlado:** o MVP são as quatro visualizações exigidas; o resto é incremento.
+- **Simplicity:** an academic project does not need production architecture.
+- **Reproducibility:** anyone must be able to redo the flow.
+- **Separation of responsibilities:** data, features, model, visualization, and dashboard must not be mixed.
+- **Traceability:** each dashboard number must come from a pipeline-generated artifact.
+- **Scope control:** the MVP is the four required visualizations; the rest is increments.
 
-### 6.2 Fluxo lógico
+### 6.2 Logical flow
 
 ```text
 Kaggle
   │
   ▼
-data/raw/ (imutável, não versionado)
+data/raw/ (immutable, not versioned)
   │
   ▼
-validação e auditoria ──► relatório de qualidade
+validation and audit ──► quality report
   │
   ▼
-limpeza e transformação ──► data/processed/
+cleaning and transformation ──► data/processed/
   │
-  ├──► EDA ──► figuras e insights
-  │
-  ▼
-features + split treino/teste
+  ├──► EDA ──► figures and insights
   │
   ▼
-treino ──► modelo ──► avaliação ──► métricas e artefatos
+features + train/test split
   │
   ▼
-dashboard (agregações + resultados do modelo)
+training ──► model ──► evaluation ──► metrics and artifacts
+  │
+  ▼
+dashboard (aggregations + model results)
 ```
 
-#### 6.2.1 Fluxo lógico canônico em camadas (proposto)
+#### 6.2.1 Canonical layered flow (proposal)
 
-O diagrama acima descreve o pipeline de dados e modelagem. O fluxo abaixo é a referência **canônica** para o caminho de serviço do dashboard; é uma proposta para a fase de implementação, sem código criado nesta etapa:
+The diagram above describes the data pipeline and modeling. The flow below is the **canonical** reference to the dashboard service path; it is a proposal for the implementation phase, without code created at this stage:
 
 ```text
 Prepared Dataset (CSV)
@@ -518,98 +517,97 @@ Presentation Layer
 Interactive Dashboard
 ```
 
-As regras de dependência, o mapeamento proposto para as pastas e o papel da trilha offline de Machine Learning estão em [`docs/ARCHITECTURE.md`](ARCHITECTURE.md), documento de referência deste desenho. A base (P-01) e a ferramenta (P-04) seguem pendentes: o fluxo é agnóstico a ambas.
+The dependency rules, the proposed folder mapping, and the role of the offline Machine Learning trail are in [`docs/ARCHITECTURE.md`](ARCHITECTURE.md), the reference document of this design. The base (P-01) and the tool (P-04) are still pending: the flow is agnostic to both.
 
-### 6.3 Estrutura de pastas
+### 6.3 Folder structure
 
-A **área de dados já foi criada** para receber as bases: `data/raw/`, `data/interim/`, `data/processed/` e `data/README.md`, com instruções de onde colocar cada arquivo. A estrutura abaixo foi implementada no MVP: as pastas de camadas existem em `src/projeto_integrador/` e os relatórios são gerados em `reports/`. O scaffold original (`main.py`, testes e configuração de Ruff/pytest) foi preservado.
+The **data area was already created** to receive the bases: `data/raw/`, `data/interim/`, `data/processed/`, and `data/README.md`, with instructions on where to place each file. The structure below is what was implemented in the MVP: the layer folders exist in `src/credit_card_fraud/` and reports are generated in `reports/`. The original scaffold (`main.py`, tests, and Ruff/pytest settings) was preserved.
 
 ```text
-projeto-integrador/
+credit-card-fraud/
 ├── AGENTS.md
 ├── README.md
 ├── pyproject.toml
 ├── docs/
 │   ├── PROJECT_PLAN.md
-│   ├── ARCHITECTURE.md           # referência canônica do fluxo em camadas
-│   ├── DATA_DICTIONARY.md        # a criar na etapa de dados
-│   └── DECISIONS.md              # opcional: registro de decisões
+│   ├── ARCHITECTURE.md           # canonical reference of the layered flow
+│   ├── DATA_DICTIONARY.md        # to be created in the data step
+│   └── DECISIONS.md              # optional: decision record
 ├── data/
-│   ├── README.md                 # instruções da área de dados
-│   ├── raw/                      # arquivos originais, não versionados
-│   ├── interim/                  # dados intermediários, não versionados
-│   └── processed/                # dados finais, não versionados
+│   ├── README.md                 # instructions for the data area
+│   ├── raw/                      # original files, not versioned
+│   ├── interim/                  # intermediate data, not versioned
+│   └── processed/                # final data, not versioned
 ├── notebooks/
 │   ├── 01_auditoria.ipynb
 │   ├── 02_eda.ipynb
 │   └── 03_modelagem.ipynb
-├── src/projeto_integrador/
+├── src/credit_card_fraud/
 │   ├── __init__.py
-│   ├── config.py                 # caminhos, sementes, constantes
-│   ├── data/                     # Data Access: carga, validação e cache
-│   ├── analytics/                # Analytics/Domain: métricas, agregações e regras
-│   ├── application/              # Application: filtros, serviços e estado da sessão
-│   ├── features/                 # trilha offline: transformações para modelagem
-│   ├── models/                   # trilha offline: treino e avaliação
-│   └── presentation/             # Presentation: páginas, filtros, KPIs, gráficos e tabelas
+│   ├── config.py                 # paths, seeds, constants
+│   ├── data/                     # Data Access: load, validation, cache
+│   ├── analytics/                # Analytics/Domain: metrics, aggregations, rules
+│   ├── application/              # Application: filters, services, session state
+│   ├── features/                 # offline trail: transformations for modeling
+│   ├── models/                   # offline trail: training, evaluation
+│   └── presentation/             # Presentation: pages, filters, KPIs, graphs, tables
 ├── reports/
-│   └── figures/                  # figuras geradas
+│   └── figures/                  # generated figures
 └── tests/
 ```
 
-**Mudanças propostas (não aprovadas):** `analytics/` e `application/` são diretórios novos propostos; `viz/` e `dashboard/` da proposta anterior ficam **absorvidos** por `presentation/`; `features/` e `models/` permanecem na trilha offline de ML (E5–E7), sem renomeação. O mapeamento completo por camada está em [`docs/ARCHITECTURE.md`](ARCHITECTURE.md). Nenhuma pasta deve ser criada enquanto a fase for de planejamento.
+**Proposed changes (not approved):** `analytics/` and `application/` are new directories proposed; the previous proposal's `viz/` and `dashboard/` are **absorbed** by `presentation/`; `features/` and `models/` remain in the ML offline trail (E5–E7), without renaming. The complete per-layer mapping is in [`docs/ARCHITECTURE.md`](ARCHITECTURE.md). No folder should be created while the phase is planning.
 
-**Cuidados:**
+**Cautions:**
 
-- a área `data/` já está protegida no `.gitignore`; mantenha os arquivos de dados fora do Git;
-- consulte `data/README.md` para os nomes e links das bases;
-- não editar os arquivos de `data/raw/`; gerar cópias tratadas em `data/interim/` ou `data/processed/`;
-- não duplicar lógica entre notebook e módulo: o notebook pode importar funções de `src/`;
-- manter o entrypoint e os testes existentes funcionando;
-- criar apenas os módulos necessários, não uma estrutura vazia.
+- the `data/` area is already protected in `.gitignore`; keep data files out of Git;
+- consult `data/README.md` for base names and links;
+- do not edit `data/raw/` files; generate treated copies in `data/interim/` or `data/processed/`;
+- do not duplicate logic between notebook and module: the notebook can import functions from `src/`;
+- keep the existing entrypoint and tests working;
+- create only the modules needed, not an empty structure.
 
-### 6.4 Tecnologias
+### 6.4 Technologies
 
-| Camada | Situação atual | Sugestão | Status |
+| Layer | Current situation | Proposal | Status |
 |---|---|---|---|
-| Linguagem | Python ≥3.11 | Manter | Atual |
-| Ambiente | `uv` + `.venv` | Manter | Atual |
-| Lint/formatação | Ruff | Manter | Atual |
-| Testes | pytest | Manter e ampliar | Atual |
-| Manipulação | — | pandas, numpy | Sugerido |
-| Visualização | — | matplotlib, seaborn | Sugerido |
-| ML | — | scikit-learn | Sugerido |
-| Desbalanceamento | — | `class_weight`; opcional `imbalanced-learn` | Sugerido |
-| Dashboard | — | Streamlit (mais simples) ou Dash/Plotly | **Decidir** |
-| Notebooks | — | Jupyter/Colab para EDA e experimentos | Sugerido |
-| Deploy | — | Não necessário no MVP | **Decidir** |
+| Language | Python ≥3.11 | Keep | Current |
+| Environment | `uv` + `.venv` | Keep | Current |
+| Lint/format | Ruff | Keep | Current |
+| Tests | pytest | Keep and expand | Current |
+| Manipulation | — | pandas, numpy | Suggested |
+| Visualization | — | matplotlib, seaborn | Suggested |
+| ML | — | scikit-learn | Suggested |
+| Imbalance | — | `class_weight`; optional `imbalanced-learn` | Suggested |
+| Dashboard | — | Streamlit (simpler) or Dash/Plotly | **Decide** |
+| Notebooks | — | Jupyter/Colab for EDA and experiments | Suggested |
+| Deployment | — | Not needed in MVP | **Decide** |
 
-**Recomendação:** usar Streamlit se não houver exigência institucional de outra ferramenta, porque reduz o esforço de interface e mantém o dashboard em Python. Dash/Plotly oferece mais controle visual, mas aumenta a complexidade. Não adicionar dependências antes de a ferramenta ser escolhida.
+**Recommendation:** use Streamlit if there is no institutional requirement for another tool, because it reduces interface effort and keeps the dashboard in Python. Dash/Plotly offers more visual control, but increases complexity. Do not add dependencies before the tool is chosen.
 
-### 6.5 Camada de dados do dashboard
+### 6.5 Dashboard data layer
 
-Para a base MLG/ULB, o dashboard não deve carregar 284 mil linhas e recalcular tudo a cada interação se isso prejudicar o desempenho. Opções:
+For the MLG/ULB base, the dashboard should not load 284,000 lines and recompute everything on each interaction if it harms performance. Options:
 
-- pré-agregar indicadores e séries em arquivos leves;
-- cachear o carregamento;
-- carregar apenas as colunas necessárias.
+- pre-aggregate indicators and time series in light files;
+- cache loading;
+- load only the necessary columns.
 
-A predição individual, se entrar no escopo, deve usar o mesmo pipeline de transformação do treino, não uma reimplementação paralela.
-
+Individual prediction, if it enters the scope, should use the same transformation pipeline as training, not a parallel reimplementation.
 ---
 
-## 7. Etapas de desenvolvimento
+## 7. Development steps
 
-### 7.1 Sequência e dependências
+### 7.1 Sequence and dependencies
 
 ```text
-E1 Escopo
+E1 Scope
   │
   ▼
-E2 Dados
+E2 Data
   │
   ▼
-E3 Auditoria/limpeza ◄──┐
+E3 Audit/cleaning ◄──┐
   │                     │
   ▼                     │
 E4 EDA ─────────────────┘
@@ -618,657 +616,663 @@ E4 EDA ─────────────────┘
 E5 Features/split
   │
   ▼
-E6 Modelagem ◄──┐
+E6 Modeling ◄──┐
   │             │
   ▼             │
-E7 Avaliação ───┘
+E7 Evaluation ───┘
   │
   ▼
 E8 Dashboard
   │
   ▼
-E9 Integração/validação
+E9 Integration/validation
   │
   ▼
-E10 Entregáveis acadêmicos
+E10 Academic deliverables
 ```
 
-As setas de retorno indicam iterações esperadas: a EDA pode revelar problemas que voltam para a limpeza; a avaliação pode exigir novo treino; o dashboard pode revelar a necessidade de novos cortes na EDA.
+The feedback arrows indicate expected iterations: EDA can reveal problems that go back to cleaning; evaluation can require retraining; the dashboard can reveal new cuts for EDA.
 
-### E1 — Entendimento e definição do problema
+### E1 — Scope and problem definition
 
-**Objetivo:** alinhar o grupo sobre problema, objetivos, público, escopo, base, ferramenta e critérios de sucesso antes de codar.
+**Goal:** align the group on problem, objectives, audience, scope, base, tool, and success criteria before coding.
 
-**Atividades:**
+**Activities:**
 
-- revisar a apresentação e este plano com o grupo;
-- confirmar a base e a versão (MLG/ULB ou sintética);
-- confirmar o público-alvo e os usos do dashboard;
-- definir o MVP: quatro visualizações obrigatórias e filtros viáveis;
-- decidir ferramenta do dashboard e se haverá aba de predição;
-- confirmar formato, prazos e rubrica com o professor;
-- registrar as decisões na Seção 10 e atualizar o `AGENTS.md`.
+- review the presentation and this plan with the group;
+- confirm the base and version (MLG/ULB or synthetic);
+- confirm the target audience and dashboard uses;
+- define the MVP: four required visualizations and feasible filters;
+- decide the dashboard tool and whether there will be a prediction tab;
+- confirm format, deadlines, and rubric with the professor;
+- record the decisions in Section 10 and update the [`AGENTS.md`](AGENTS.md).
 
-**Conhecimentos:** definição de problema, ciclo de vida, requisitos, escopo.
+**Knowledge:** problem definition, lifecycle, requirements, scope.
 
-**Dependências:** materiais fornecidos, disponibilidade do grupo e orientação do professor.
+**Dependencies:** provided materials, group availability, professor guidance.
 
-**Resultado esperado:** escopo aprovado, decisões registradas, pendências críticas resolvidas.
+**Expected result:** approved scope, recorded decisions, resolved critical pending items.
 
-**Concluída quando:**
+**Done when:**
 
-- a base escolhida está registrada com link e versão;
-- o público e o MVP estão definidos;
-- a ferramenta do dashboard está escolhida;
-- o formato de entrega e o calendário estão confirmados;
-- não há requisito conflitante sem decisão.
+- the chosen base is recorded with link and version;
+- the audience and MVP are defined;
+- the dashboard tool is chosen;
+- the delivery format and calendar are confirmed;
+- there are no conflicting requirements without a decision.
 
-### E2 — Aquisição e governança dos dados
+### E2 — Data acquisition and governance
 
-**Objetivo:** obter a base correta, garantir proveniência, licença e armazenamento adequado.
+**Goal:** obtain the correct base, ensure provenance, license, and storage.
 
-**Atividades:**
+**Activities:**
 
-- baixar a base pela fonte oficial;
-- registrar URL, data de acesso, versão e licença;
-- calcular hash ou checksum e conferir linhas/colunas;
-- criar dicionário de dados;
-- armazenar o arquivo bruto em `data/raw/` sem edições, seguindo `data/README.md`;
-- conferir se a área de dados continua protegida pelo `.gitignore`;
-- verificar se há dados pessoais ou restrições de uso.
+- download the base from the official source;
+- record URL, access date, version, and license;
+- compute hash or checksum and verify rows/columns;
+- create the data dictionary;
+- store the raw file in `data/raw/` without changes, following [`data/README.md`](data/README.md);
+- verify the data area is still protected by `.gitignore`;
+- check for personal data or usage restrictions.
 
-**Conhecimentos:** coleta, governança, licenciamento, privacidade.
+**Knowledge:** collection, governance, licensing, privacy.
 
-**Dependências:** E1 (base escolhida).
+**Dependencies:** E1 (chosen base).
 
-**Resultado esperado:** base bruta, dicionário de dados e registro de proveniência.
+**Expected result:** raw base, data dictionary, provenance record.
 
-**Concluída quando:**
+**Done when:**
 
-- a base pode ser obtida novamente de forma documentada;
-- o checksum e as dimensões conferem;
-- a licença é conhecida;
-- não há PII no repositório.
+- the base can be obtained again from a documented source;
+- the checksum and dimensions check out;
+- the license is known;
+- no PII in the repository.
 
-### E3 — Auditoria e pré-processamento
+### E3 — Audit and preprocessing
 
-**Objetivo:** diagnosticar a qualidade dos dados e produzir uma base limpa, com decisões documentadas.
+**Goal:** diagnose data quality and produce a cleaned base with documented decisions.
 
-**Atividades:**
+**Activities:**
 
-- inspecionar tipos, faixas, nulos, duplicatas e valores inválidos;
-- medir a distribuição do alvo;
-- investigar duplicatas (na MLG/ULB, 1.081 linhas, incluindo 19 fraudes);
-- investigar valores zero, outliers e inconsistências;
-- decidir o que remover, corrigir ou manter;
-- documentar cada regra e o impacto no número de fraudes;
-- criar relatório de qualidade.
+- inspect types, ranges, nulls, duplicates, and invalid values;
+- measure the target distribution;
+- investigate duplicates (on MLG/ULB: 1,081 rows, of which 19 frauds);
+- investigate zero values, outliers, and inconsistencies;
+- decide what to remove, correct, or keep;
+- document every rule and the impact on the fraud count;
+- create the quality report.
 
-**Conhecimentos:** limpeza, validação, estatística descritiva, análise de dados faltantes.
+**Knowledge:** cleaning, validation, descriptive statistics, missing-data analysis.
 
-**Dependências:** E2.
+**Dependencies:** E2.
 
-**Resultado esperado:** base limpa, relatório de qualidade e log de transformações.
+**Expected result:** cleaned base, quality report, transformation log.
 
-**Concluída quando:**
+**Done when:**
 
-- todos os problemas de qualidade estão quantificados;
-- cada remoção tem justificativa;
-- o impacto na classe positiva está registrado;
-- a base limpa é reproduzível por script ou notebook.
+- all quality problems are quantified;
+- each removal has a justification;
+- the impact on the positive class is recorded;
+- the cleaned base is reproducible by script or notebook.
 
-### E4 — Análise exploratória dos dados
+### E4 — Exploratory data analysis
 
-**Objetivo:** entender distribuições, padrões, relações e anomalias, e responder aos três objetivos específicos.
+**Goal:** understand distributions, patterns, relationships, and anomalies, and answer the three specific objectives.
 
-**Atividades:**
+**Activities:**
 
-- estatísticas descritivas gerais e por classe;
-- histogramas, boxplots e dispersão para valor e atributos relevantes;
-- comparação fraudes × não fraudes;
-- análise por faixa de valor;
-- análise temporal (com a limitação da base);
-- heatmap e correlação;
-- identificação de outliers e comportamentos inesperados;
-- registro de insights e de hipóteses para a modelagem;
-- rascunho das visualizações do dashboard.
+- general and per-class descriptive statistics;
+- histograms, boxplots, and scatter plots for value and relevant attributes;
+- frauds vs non-frauds comparison;
+- value-band analysis;
+- temporal analysis (with the base limitation);
+- heatmap and correlation;
+- outlier and unexpected behavior identification;
+- record insights and hypotheses for modeling;
+- draft the dashboard visualizations.
 
-**Conhecimentos:** EDA, estatística descritiva, visualização, correlação.
+**Knowledge:** EDA, descriptive statistics, visualization, correlation.
 
-**Dependências:** E3.
+**Dependencies:** E3.
 
-**Resultado esperado:** notebook/relatório de EDA, figuras e lista de achados.
+**Expected result:** EDA report, figures, findings list.
 
-**Concluída quando:**
+**Done when:**
 
-- cada objetivo específico tem evidência visual ou estatística;
-- as limitações da base estão explícitas;
-- não há afirmações causais sem suporte;
-- os achados orientam a seleção de variáveis e o tipo de modelo.
+- each specific objective has visual or statistical evidence;
+- base limitations are explicit;
+- no causal claims without support;
+- findings guide variable selection and model type.
 
-### E5 — Preparação de atributos e separação treino/teste
+### E5 — Attributes and train/test split
 
-**Objetivo:** construir o conjunto de modelagem de forma reproduzível e sem vazamento.
+**Goal:** build the modeling base reproducibly and without leakage.
 
-**Atividades:**
+**Activities:**
 
-- definir variáveis de entrada e alvo;
-- criar indicadores justificados pela EDA (faixas de valor, hora/bloco de hora, categorias);
-- codificar variáveis categóricas;
-- padronizar variáveis numéricas quando necessário;
-- separar treino e teste de forma estratificada;
-- definir a estratégia de desbalanceamento (pesos, undersampling ou oversampling) apenas no treino;
-- montar um pipeline de pré-processamento;
-- documentar o dicionário de features.
+- define input and target variables;
+- create justified indicators (value bands, time/hour block, categories);
+- encode categorical variables;
+- standardize numeric variables when needed;
+- split train and test stratified;
+- define the imbalance strategy (class weights, undersampling, or oversampling) only in training;
+- assemble a preprocessing pipeline;
+- document the features dictionary.
 
-**Conhecimentos:** transformação, codificação, escalonamento, amostragem, prevenção de vazamento.
+**Knowledge:** transformation, encoding, scaling, sampling, leakage prevention.
 
-**Dependências:** E3 e E4; decisão sobre o modelo.
+**Dependencies:** E3 and E4; decision on the model.
 
-**Resultado esperado:** pipeline de features, conjuntos de treino/teste e dicionário de atributos.
+**Expected result:** feature pipeline, train/test sets, attribute dictionary.
 
-**Concluída quando:**
+**Done when:**
 
-- o pipeline é executável do início ao fim;
-- o teste não participa de nenhum ajuste;
-- a estratégia de desbalanceamento está justificada;
-- as features são compreensíveis e documentadas.
+- the pipeline runs end to end;
+- the test set does not participate in any fitting;
+- the imbalance strategy is justified;
+- the features are comprehensible and documented.
 
-### E6 — Modelagem
+### E6 — Modeling
 
-**Objetivo:** treinar e comparar modelos de classificação para estimar a probabilidade de fraude.
+**Goal:** train and compare classification models to estimate fraud probability.
 
-**Atividades:**
+**Activities:**
 
-- treinar um baseline simples;
-- treinar pelo menos um modelo candidato (árvore, Random Forest ou boosting);
-- usar validação cruzada no treino;
-- ajustar hiperparâmetros com critério definido;
-- testar pesos de classe ou reamostragem;
-- registrar sementes, versões e resultados;
-- escolher o modelo final com justificativa.
+- train a simple baseline;
+- train at least one candidate model (tree, Random Forest, or boosting);
+- use cross-validation in training;
+- tune hyperparameters with a defined criterion;
+- test class weights or resampling;
+- record seeds, versions, and results;
+- choose the final model with justification.
 
-**Conhecimentos:** aprendizado supervisionado, classificação, árvores, ensembles, validação cruzada.
+**Knowledge:** supervised learning, classification, trees, ensembles, cross-validation.
 
-**Dependências:** E5.
+**Dependencies:** E5.
 
-**Resultado esperado:** modelos treinados, experimentos registrados e modelo selecionado.
+**Expected result:** trained models, recorded experiments, selected model.
 
-**Concluída quando:**
+**Done when:**
 
-- há pelo menos dois modelos comparáveis;
-- o baseline foi superado ou há justificativa para não superá-lo;
-- os experimentos são reproduzíveis;
-- o modelo final está salvo com o pipeline correspondente.
+- at least two models compared;
+- baseline is defeated or justified otherwise;
+- experiments are reproducible;
+- the final model is saved with its corresponding pipeline.
 
-### E7 — Avaliação e interpretação
+### E7 — Evaluation and interpretation
 
-**Objetivo:** medir o desempenho no holdout, escolher o limite de decisão e interpretar os fatores associados.
+**Goal:** measure performance on holdout, choose the decision threshold, and interpret associated factors.
 
-**Atividades:**
+**Activities:**
 
-- calcular AUPRC, precision, recall, F1, ROC-AUC e matriz de confusão;
-- analisar o efeito do limite de decisão;
-- comparar com o baseline;
-- analisar erros (falsos positivos e falsos negativos);
-- extrair importância de variáveis ou permutação;
-- discutir o significado dos fatores, respeitando a limitação de PCA na MLG/ULB;
-- registrar limitações e riscos de generalização;
-- produzir um “model card” resumido.
+- compute AUPRC, precision, recall, F1, ROC-AUC, and confusion matrix;
+- analyze the decision threshold effect;
+- compare with the baseline;
+- analyze errors (false positives and false negatives);
+- extract variable or permutation importance;
+- discuss the meaning of factors, respecting MLG/ULB's PCA limitation;
+- record limitations and generalization risks;
+- produce a summarized “model card”.
 
-**Conhecimentos:** avaliação de classificação desbalanceada, interpretabilidade, análise de erro.
+**Knowledge:** classification evaluation under imbalance, interpretability, error analysis.
 
-**Dependências:** E6.
+**Dependencies:** E6.
 
-**Resultado esperado:** relatório de avaliação, figuras e modelo documentado.
+**Expected result:** evaluation report, figures, documented model.
 
-**Concluída quando:**
+**Done when:**
 
-- as métricas são reproduzíveis;
-- a acurácia não é a métrica principal;
-- o limite é justificado;
-- os fatores são apresentados com o devido cuidado;
-- as limitações estão no relatório.
+- metrics are reproducible;
+- accuracy is not the main metric;
+- the threshold is justified;
+- factors are presented with proper caution;
+- limitations are in the report.
 
 ### E8 — Dashboard
 
-**Objetivo:** entregar um dashboard interativo com as quatro visualizações mínimas e dados consistentes.
+**Goal:** deliver an interactive dashboard with the four minimum visualizations and consistent data.
 
-**Atividades:**
+**Activities:**
 
-- definir layout e navegação;
-- implementar indicadores gerais;
-- implementar distribuição de fraudes;
-- implementar fraudes por faixa de valor;
-- implementar evolução temporal;
-- adicionar filtros viáveis (período, faixa, status);
-- decidir e implementar a aba de predição, se aprovada;
-- corrigir rótulos de moeda e tempo;
-- validar números contra a EDA e o modelo;
-- testar usabilidade e desempenho;
-- documentar como executar.
+- define layout and navigation;
+- implement general indicators;
+- implement fraud distribution;
+- implement frauds by value band;
+- implement temporal evolution;
+- add feasible filters (period, value band, status);
+- decide and implement the prediction tab if approved;
+- correct currency and time labels;
+- validate numbers against EDA and the model;
+- test usability and performance;
+- document how to run it.
 
-**Conhecimentos:** visualização, design de dashboard, storytelling com dados.
+**Knowledge:** visualization, dashboard design, data storytelling.
 
-**Dependências:** E4 (visualizações) e E7 (resultados do modelo); ferramenta escolhida em E1.
+**Dependencies:** E4 (visualizations) and E7 (model results); tool chosen in E1.
 
-**Resultado esperado:** aplicação executável, com as quatro visualizações e documentação de uso.
+**Expected result:** executable application with the four visualizations and usage documentation.
 
-**Concluída quando:**
+**Done when:**
 
-- as quatro visualizações obrigatórias estão presentes e funcionam;
-- os filtros não quebram;
-- os números batem com os artefatos;
-- não há valores fictícios do mockup;
-- a execução local está documentada;
-- o dashboard é compreensível para o público definido.
+- the four required visualizations are present and working;
+- filters do not break;
+- numbers match the artifacts;
+- no sketch dummy values;
+- local execution is documented;
+- the dashboard is understandable by the target audience.
 
-### E9 — Integração e validação final
+### E9 — Integration and final validation
 
-**Objetivo:** garantir que o conjunto funciona de ponta a ponta e é reproduzível.
+**Goal:** ensure the whole works end to end and is reproducible.
 
-**Atividades:**
+**Activities:**
 
-- executar o pipeline em ambiente limpo;
-- conferir dependências e instruções do README;
-- rodar testes e lint;
-- validar a matriz de rastreabilidade dos requisitos;
-- revisar dados, métricas e figuras;
-- revisar segurança e privacidade;
-- corrigir inconsistências;
-- congelar a versão para a entrega.
+- run the pipeline in a clean environment;
+- verify dependencies and README instructions;
+- run tests and lint;
+- validate the requirements traceability matrix;
+- review data, metrics, and figures;
+- review security and privacy;
+- fix inconsistencies;
+- freeze the version for delivery.
 
-**Conhecimentos:** testes, reprodutibilidade, documentação, revisão.
+**Knowledge:** tests, reproducibility, documentation, review.
 
-**Dependências:** E2 a E8.
+**Dependencies:** E2 to E8.
 
-**Resultado esperado:** repositório integrado, validado e documentado.
+**Expected result:** integrated, validated, and documented repository.
 
-**Concluída quando:**
+**Done when:**
 
-- uma pessoa consegue reproduzir os resultados principais;
-- o dashboard abre e responde;
-- testes e lint passam;
-- não há vazamento de dados;
-- a documentação está atualizada.
+- the chosen base is documented and treated;
+- EDA answers the three specific objectives;
+- the model is trained, evaluated, and interpreted with adequate metrics;
+- the dashboard has the four required visualizations and consistent numbers;
+- the pipeline can be reproduced in a clean environment;
+- the report and presentation align with the rubric;
+- all critical pending items in Section 10 are resolved or explicitly assumed as limitations.
 
-### E10 — Entregáveis acadêmicos
+### E10 — Academic deliverables
 
-**Objetivo:** produzir relatório, apresentação e demonstração alinhados à rubrica.
+**Goal:** produce the report, presentation, and demo aligned to the rubric.
 
-**Atividades:**
+**Activities:**
 
-- escrever introdução, problema, objetivos e justificativa;
-- documentar metodologia, dados, tratamento, EDA, modelagem e avaliação;
-- apresentar resultados com figuras e tabelas;
-- discutir limitações e trabalhos futuros;
-- revisar citações e referências;
-- preparar slides e roteiro de demonstração;
-- ensaiar a defesa;
-- revisar a aderência à rubrica.
+- write introduction, problem, objectives, and justification;
+- document methodology, data, treatment, EDA, modeling, and evaluation;
+- present results with figures and tables;
+- discuss limitations and future work;
+- review citations and references;
+- prepare slides and a demonstration script;
+- rehearse the defense;
+- review rubric adherence.
 
-**Conhecimentos:** escrita científica, comunicação, ética, apresentação.
+**Knowledge:** scientific writing, communication, ethics, presentation.
 
-**Dependências:** E9 e rubrica oficial.
+**Dependencies:** E9 and the official rubric.
 
-**Resultado esperado:** relatório, slides, demo e código organizado.
+**Expected result:** report, slides, demo, and organized code.
 
-**Concluída quando:**
+**Done when:**
 
-- a rubrica está atendida;
-- as fontes estão citadas;
-- os resultados são rastreáveis;
-- a demo funciona;
-- o grupo consegue explicar e defender as decisões.
+- the rubric is met;
+- sources are cited;
+- results are traceable;
+- the demo works;
+- the group can explain and defend the decisions.
 
 ---
 
-## 8. Dependências e riscos
+## 8. Dependencies and risks
 
-### 8.1 Dependências críticas
+### 8.1 Critical dependencies
 
-| Dependência | Bloqueia | Observação |
+| Dependency | Blocks | Note |
 |---|---|---|
-| Definição da base (MLG/ULB ou sintética) | E2–E8 | Sem isso, o escopo do dashboard e as métricas mudam. |
-| Ferramenta do dashboard | E8 | Streamlit, Dash ou outra; decidir antes de implementar. |
-| Público-alvo | E8 e E10 | Afeta linguagem, filtros e narrativa. |
-| Rubrica e prazos | E10 | Não fornecidos nos materiais. |
-| Estratégia de métricas e limite | E7 | Depende do objetivo de negócio. |
-| Definição sobre a aba de predição | E8 | Pode ser MVP ou incremento. |
-| Política de uso de IA e citações | E10 | Confirmar com a instituição. |
+| Base definition (MLG/ULB or synthetic) | E2–E8 | Otherwise the dashboard scope and metrics change. |
+| Dashboard tool | E8 | Streamlit, Dash, or other; decide before implementation. |
+| Target audience | E8 and E10 | Affects language, filters, and narrative. |
+| Rubric and deadlines | E10 | Not provided in the materials. |
+| Metrics strategy and threshold | E7 | Depends on the business objective. |
+| Prediction tab decision | E8 | Can be MVP or increment. |
+| AI usage policy and citations | E10 | Confirm with the institution. |
 
-### 8.2 Riscos
+### 8.2 Risks
 
-| ID | Risco | Impacto | Mitigação |
+| ID | Risk | Impact | Mitigation |
 |---|---|---|---|
-| **R-01** | Ambiguidade entre a base MLG/ULB e a sintética. | Alto: muda escopo, números e conclusões. | Decidir em E1; registrar versão e link; não misturar. |
-| **R-02** | Usar números do mockup como se fossem resultados. | Alto: integridade acadêmica. | Recalcular tudo; remover ou rotular o mockup como ilustrativo. |
-| **R-03** | Desbalanceamento extremo. | Alto: modelo aparentemente bom e inútil. | AUPRC, precision, recall, F1, matriz de confusão; pesos/reamostragem. |
-| **R-04** | Vazamento de dados. | Alto: métricas infladas. | Split antes de transformar; pipeline; validar. |
-| **R-05** | Duplicatas na MLG/ULB. | Médio: 19 fraudes removidas se descartadas. | Decidir e documentar; comparar cenários. |
-| **R-06** | Atributos anonimizados por PCA. | Médio: explicação de negócio limitada. | Explicar a limitação; usar importância de componentes e `Amount`. |
-| **R-07** | Tempo relativo e janela de dois dias. | Médio: análise temporal limitada. | Analisar blocos relativos; não afirmar sazonalidade; declarar premissas. |
-| **R-08** | Moeda do esboço (R$) diferente da base. | Médio: gráficos e conclusões errados. | Definir unidade; corrigir rótulos; não converter sem fonte. |
-| **R-09** | Filtro “tipo de transação” inexistente na MLG/ULB. | Médio: requisito impossível. | Remover, redefinir ou migrar para a base sintética. |
-| **R-10** | Poucos positivos (492 ou 151). | Médio: métricas instáveis. | Validação cruzada; evitar subgrupos pequenos; reportar incerteza. |
-| **R-11** | Escopo do dashboard crescer demais. | Médio: atraso. | MVP com quatro visualizações; incrementos depois. |
-| **R-12** | Ferramenta do dashboard mal escolhida. | Médio: retrabalho. | Protótipo rápido; decidir em E1. |
-| **R-13** | Acesso ao Kaggle ou mudança de versão. | Baixo/médio: retrabalho. | Baixar cedo; guardar cópia bruta; registrar checksum. |
-| **R-14** | Base sintética ser apresentada como real. | Alto: credibilidade. | Rotular claramente; não usar para conclusões sobre fraude real. |
-| **R-15** | Falta de rubrica/prazos. | Médio: entrega fora do esperado. | Confirmar com o professor antes de E10. |
-| **R-16** | Reprodução inconsistente entre notebook e dashboard. | Médio: números divergentes. | Fonte única de artefatos; testes de conferência. |
+| **R-01** | Ambiguity between MLG/ULB and the synthetic base. | High: changes scope, numbers, and conclusions. | Decide in E1; record version and link; do not mix. |
+| **R-02** | Using sketch numbers as if they were results. | High: academic integrity. | Recompute everything; remove or label the sketch as illustrative. |
+| **R-03** | Extreme imbalance. | High: apparently good but useless model. | AUPRC, precision, recall, F1, confusion matrix; class weights/resampling. |
+| **R-04** | Data leakage. | High: inflated metrics. | Split before transforming; pipeline; validation. |
+| **R-05** | Duplicates in MLG/ULB. | Medium: 19 frauds removed if discarded. | Decide and document; compare scenarios. |
+| **R-06** | PCA-anonymized attributes. | Medium: limited business explanation. | Explain the limitation; use component importance and `Amount`. |
+| **R-07** | Relative time and two-day window. | Medium: limited temporal analysis. | Analyze relative blocks; do not claim seasonality; state assumptions. |
+| **R-08** | Sketch currency (R$) differs from the base. | Medium: wrong charts and conclusions. | Define the unit; fix labels; do not convert without a source. |
+| **R-09** | “Transaction type” filter nonexistent in MLG/ULB. | Medium: impossible requirement. | Remove, redefine, or migrate to the synthetic base. |
+| **R-10** | Few positives (492 or 151). | Medium: unstable metrics. | Cross-validation; avoid tiny subgroups; report uncertainty. |
+| **R-11** | Dashboard scope growing too much. | Medium: delay. | MVP with four visualizations; increments later. |
+| **R-12** | Poorly chosen dashboard tool. | Medium: rework. | Quick prototype; decide in E1. |
+| **R-13** | Kaggle access or base version change. | Low/medium: rework. | Download early; keep raw copy; record checksum. |
+| **R-14** | Presenting the synthetic base as real fraud data. | High: credibility. | Label clearly; do not use for claims about real fraud. |
+| **R-15** | Missing rubric/deadlines. | Medium: delivery outside expectations. | Confirm with the professor before E10. |
+| **R-16** | Inconsistency between notebook and dashboard numbers. | Medium: divergent numbers. | Single-source artifacts; reconciliation tests. |
 
-### 8.3 Premissas explícitas
+### 8.3 Explicit premises
 
-Estas premissas **não** são fatos dos materiais; devem ser validadas:
+These premises are **not** facts from the materials; they must be validated:
 
-- o dashboard será usado por analistas/gestores, e não por clientes finais;
-- a execução local é suficiente; não há exigência de deploy;
-- o projeto será entregue como relatório + apresentação + código;
-- a instituição aceita o uso de dados públicos anonimizados;
-- o grupo pode usar Python e bibliotecas open source;
-- não há restrição de tamanho ou de ferramenta que impeça a base MLG/ULB.
+- the dashboard will be used by risk/fraud analysts and managers, not final customers;
+- local execution is enough; there is no deployment requirement;
+- the project will be delivered as report + presentation + code;
+- the institution accepts the use of public anonymized data;
+- the group can use Python and open-source libraries;
+- no size restriction or tool prevents using MLG/ULB.
 
-### 8.4 Restrições
+### 8.4 Constraints
 
-- tempo acadêmico limitado;
-- equipe de cinco integrantes, com disponibilidade não documentada;
-- base pública, sem possibilidade de coletar dados próprios;
-- a base real tem apenas dois dias e atributos anonimizados;
-- o projeto é acadêmico, não um produto comercial.
+- limited academic time;
+- team of five, with undocumented availability;
+- public base, no possibility of collecting own data;
+- real base has only two days and anonymized attributes;
+- project is academic, not commercial product.
 
 ---
 
-## 9. Critérios de validação
+## 9. Validation criteria
 
-### 9.1 Portões por etapa
+### 9.1 Gates per step
 
-| Etapa | Critério de aceite |
+| Step | Acceptance criterion |
 |---|---|
-| E1 | Base, público, MVP, ferramenta e formato de entrega definidos e registrados. |
-| E2 | Base obtida, checksum/dimensões conferidos, licença e dicionário documentados. |
-| E3 | Qualidade auditada; remoções justificadas; impacto na classe positiva registrado. |
-| E4 | Cada objetivo específico respondido com estatística/figura; limitações explícitas. |
-| E5 | Pipeline reproduzível; split estratificado; sem vazamento; desbalanceamento tratado no treino. |
-| E6 | Pelo menos dois modelos comparados; validação cruzada; sementes registradas. |
-| E7 | Métricas completas; limite justificado; erros analisados; limitações registradas. |
-| E8 | Quatro visualizações obrigatórias; filtros funcionando; números conferidos. |
-| E9 | Execução em ambiente limpo; testes/lint; documentação; rastreabilidade. |
-| E10 | Rubrica atendida; fontes citadas; demo; defesa ensaiada. |
+| E1 | Base, audience, MVP, tool, and delivery format defined and recorded. |
+| E2 | Base obtained; checksum/dimensions verified; license and dictionary documented. |
+| E3 | Quality audited; removals justified; positive-class impact recorded. |
+| E4 | Each specific objective answered with statistics/figures; limitations explicit. |
+| E5 | Reproducible pipeline; stratified split; no leakage; imbalance handled in training. |
+| E6 | At least two models compared; cross-validation; seeds recorded. |
+| E7 | Complete metrics; justified threshold; error analysis; limitations recorded. |
+| E8 | Four mandatory visualizations; working filters; numbers reconciled. |
+| E9 | Clean-environment execution; tests/lint; documentation; traceability. |
+| E10 | Rubric met; sources cited; demo; rehearsal done. |
 
-### 9.2 Checklist de dados
+### 9.2 Data checklist
 
-- [ ] URL, data de acesso, versão e licença registradas.
-- [ ] Dimensões e checksum conferidos.
-- [ ] Dicionário de dados criado.
-- [ ] Nulos, duplicatas, outliers e valores inválidos avaliados.
-- [ ] Distribuição do alvo registrada.
-- [ ] Decisão sobre duplicatas documentada.
-- [ ] Nenhum dado pessoal identificável no repositório.
-- [ ] Dados brutos imutáveis e não versionados.
+- [ ] URL, access date, version, and license recorded.
+- [ ] Dimensions and checksum verified.
+- [ ] Data dictionary created.
+- [ ] Nulls, duplicates, outliers, and invalid values evaluated.
+- [ ] Target distribution recorded.
+- [ ] Duplicate decision documented.
+- [ ] No identifiable personal data in the repository.
+- [ ] Raw data immutable and not versioned.
 
-### 9.3 Checklist de modelagem
+### 9.3 Modeling checklist
 
-- [ ] Split treino/teste definido antes das transformações.
-- [ ] Baseline treinado.
-- [ ] Pelo menos dois modelos comparados.
-- [ ] Validação cruzada usada no treino.
-- [ ] Desbalanceamento tratado apenas no treino.
-- [ ] AUPRC, precision, recall, F1, ROC-AUC e matriz de confusão calculados.
-- [ ] Limite de decisão justificado.
-- [ ] Importância das variáveis interpretada com cautela.
-- [ ] Sementes e versões registradas.
-- [ ] Modelo e pipeline salvos juntos.
+- [ ] Train/test split defined before transformations.
+- [ ] Baseline trained.
+- [ ] At least two models compared.
+- [ ] Cross-validation used in training.
+- [ ] Imbalance handled only in training.
+- [ ] AUPRC, precision, recall, F1, ROC-AUC, and confusion matrix computed.
+- [ ] Decision threshold justified.
+- [ ] Variable importance interpreted with caution.
+- [ ] Seeds and versions recorded.
+- [ ] Model and pipeline saved together.
 
-### 9.4 Checklist do dashboard
+### 9.4 Dashboard checklist
 
-- [ ] Indicadores gerais.
-- [ ] Distribuição de fraudes.
-- [ ] Fraudes por faixa de valor.
-- [ ] Evolução temporal.
-- [ ] Filtros viáveis e coerentes.
-- [ ] Rótulos de moeda e tempo corretos.
-- [ ] Números conferidos contra a EDA/modelo.
-- [ ] Nenhum valor fictício do mockup.
-- [ ] Execução local documentada.
-- [ ] Usabilidade testada com alguém do grupo.
+- [ ] General indicators.
+- [ ] Fraud distribution.
+- [ ] Frauds by value band.
+- [ ] Temporal evolution.
+- [ ] Feasible and coherent filters.
+- [ ] Currency and time labels correct.
+- [ ] Numbers reconciled against EDA/model.
+- [ ] No sketch dummy values.
+- [ ] Local execution documented.
+- [ ] Usability tested with someone from the group.
 
-### 9.5 Checklist acadêmico
+### 9.5 Academic checklist
 
-- [ ] Problema, objetivos e justificativa claros.
-- [ ] Metodologia alinhada ao ciclo de vida da AULA2.
-- [ ] Bases descritas e escolha justificada.
-- [ ] Tratamento e limitações documentados.
-- [ ] Resultados reproduzíveis.
-- [ ] Figuras e tabelas com fonte.
-- [ ] Citações no padrão exigido.
-- [ ] Limitações e trabalhos futuros.
-- [ ] Uso de IA declarado, se exigido.
-- [ ] Apresentação e demo ensaiadas.
+- [ ] Problem, objectives, and justification clear.
+- [ ] Methodology aligned to Lesson 2 lifecycle.
+- [ ] Bases described and choice justified.
+- [ ] Treatment and limitations documented.
+- [ ] Results reproducible.
+- [ ] Figures and tables with sources.
+- [ ] Citations in the required format.
+- [ ] Limitations and future work included.
+- [ ] AI use declared, if required.
+- [ ] Presentation and demo rehearsed.
 
-### 9.6 Critério de “pronto” do projeto
+### 9.6 “Done” criterion for the project
 
-O projeto estará pronto para entrega quando:
+The project is ready for delivery when:
 
-1. a base escolhida estiver documentada e tratada;
-2. a EDA responder aos três objetivos específicos;
-3. o modelo estiver treinado, avaliado e interpretado com métricas adequadas;
-4. o dashboard tiver as quatro visualizações obrigatórias e números consistentes;
-5. o pipeline puder ser reproduzido em ambiente limpo;
-6. o relatório e a apresentação estiverem alinhados à rubrica;
-7. todas as pendências críticas da Seção 10 estiverem resolvidas ou explicitamente assumidas como limitações.
+1. the chosen base is documented and treated;
+2. EDA answers the three specific objectives;
+3. the model is trained, evaluated, and interpreted with adequate metrics;
+4. the dashboard has the four required visualizations and consistent numbers;
+5. the pipeline can be reproduced in a clean environment;
+6. the report and presentation align with the rubric;
+7. all critical pending items in Section 10 are resolved or explicitly assumed as limitations.
 
 ---
 
-## 10. Pendências, decisões e recomendações
+## 10. Pending, decisions, and recommendations
 
-### 10.1 Decisões registradas
+### 10.1 Recorded decisions
 
-| ID | Decisão | Evidência | Status |
+| ID | Decision | Evidence | Status |
 |---|---|---|---|
-| **D-01** | O tema é detecção de fraudes em transações com cartão de crédito. | APRES, p. 2–3 | Tomada |
-| **D-02** | O objetivo geral é um dashboard interativo com análise preditiva. | APRES, p. 4 | Tomada |
-| **D-03** | Os objetivos específicos são padrões, valor e tempo. | APRES, p. 5–6 | Tomada |
-| **D-04** | O dashboard deve ter, no mínimo, quatro visualizações. | APRES, p. 10 | Tomada |
-| **D-05** | Haverá aplicação de Machine Learning. | APRES, p. 11 | Tomada |
-| **D-06** | A base será uma base de fraude do Kaggle. | APRES, p. 9 | Parcial: falta definir qual |
-| **D-07** | O projeto seguirá o ciclo de vida da AULA2. | AULA2, p. 3–16 | Diretriz acadêmica |
-| **D-08** | A documentação e o código serão em português. | Convenção do repositório e materiais | Tomada |
-| **D-09** | A interface do dashboard será em inglês; documentação e código permanecem em português. Aplica-se a rótulos de UI (KPIs, filtros, títulos/eixos/legendas, cabeçalhos, navegação, mensagens e estados vazios/de erro), não a valores brutos da base. | Decisão confirmada pelo grupo | Tomada; substitui apenas a parte de idioma da interface de RNF-03 e mantém D-08 integralmente para documentação e código. |
-| **D-10 a D-25** | Decisões da implementação: base MLG/ULB, remoção de duplicatas, tempo relativo, moeda original, Streamlit, filtros viáveis, modelos, limite de decisão, métricas, split e organização em camadas. | [`DECISIONS.md`](DECISIONS.md) | Tomadas e aplicadas no pipeline. |
+| **D-01** | The theme is credit card fraud detection. | APRES, p. 2–3 | Done |
+| **D-02** | The general objective is an interactive dashboard with predictive analysis. | APRES, p. 4 | Done |
+| **D-03** | The specific objectives are patterns, value, and time. | APRES, p. 5–6 | Done |
+| **D-04** | The dashboard must have at least four visualizations. | APRES, p. 10 | Done |
+| **D-05** | Machine Learning will be applied. | APRES, p. 11 | Done |
+| **D-06** | The base will be a Kaggle fraud base. | APRES, p. 9 | Partial: which one is pending |
+| **D-07** | The project follows the Lesson 2 lifecycle. | AULA2, p. 3–16 | Academic guidance |
+| **D-08** | OLD: documentation and code in Portuguese. | Repository convention and materials | Superseded by D-26 (documentation, code, reports, and identifiers now in English). |
+| **D-09** | OLD: dashboard interface in English; documentation and code remain in Portuguese. | Confirmed by the group | Superseded by D-26 (revoked). |
+| **D-10–D-25** | Implementation decisions: MLG/ULB base, exact duplicate removal, relative time, currency in original unit, Streamlit, feasible filters, models, decision threshold, metrics, split, and layered organization. | [`DECISIONS.md`](DECISIONS.md) | Done and applied in the pipeline. |
+| **D-26** | Dashboard interface in **Brazilian Portuguese (pt-BR)**, revoking D-09/D-17. | Explicit refinement requirement for the dashboard; better usability for the academic audience. | All KPIs, filters, graphs, tables, states, and messages in pt-BR; documentation, identifiers, and code comments remain in English (no change). |
+| **D-27** | Use **Plotly** for dashboard graphs. | Interactive tooltips and consistent dark theme require interactive graphs; static matplotlib does not meet this. | New `plotly` dependency; components in `presentation/components.py` return Plotly figures. |
+| **D-28** | pt-BR number formatting (`1.250,00`, `1,25%`), **no** currency symbol, **no** calendar dates. | Reinforces D-13/D-14: the base defines no currency or absolute date; only formatting follows the Brazilian pattern. | Single source in `formatting.py`; labels keep “original unit” and “relative hours/days”. |
+| **D-29** | Inclusion of a paginated **transaction explorer** and **offline model indicators**. | Leverages existing `random_sample`/`subset` and `reports/model/metrics.json`; no new modeling. | Filterable table with available columns (no ID/category); model metrics section marked static. |
 
-> **Nota:** o registro detalhado com justificativa e impacto de D-10 a D-25 está em [`DECISIONS.md`](DECISIONS.md).
+> **Note:** the detailed records of D-10 to D-25, with justification and impact, are in [`DECISIONS.md`](DECISIONS.md).
 
-### 10.2 Recomendações
+### 10.2 Recommendations
 
-| ID | Recomendação | Justificativa |
+| ID | Recommendation | Rationale |
 |---|---|---|
-| **R-01** | Usar a MLG/ULB como base principal. | É a base citada na apresentação, compatível com o esboço e com dado real anonimizado. |
-| **R-02** | Não usar *Give Me Some Credit*. | É de inadimplência, não de fraude, e não tem variáveis transacionais. |
-| **R-03** | Não misturar bases. | Misturar fontes diferentes confunde resultados e conclusões. |
-| **R-04** | Se usar a sintética, rotulá-la como sintética em todo lugar. | Evita afirmações sobre fraude real. |
-| **R-05** | Adotar AUPRC como métrica principal. | Recomendação oficial da base e adequada ao desbalanceamento. |
-| **R-06** | Comparar baseline e modelo candidato. | Evita escolher Random Forest apenas porque aparece no mockup. |
-| **R-07** | Usar Streamlit, salvo exigência contrária. | Menor complexidade para um dashboard acadêmico em Python. |
-| **R-08** | Fazer o MVP com as quatro visualizações antes de incrementos. | Controla escopo e prazo. |
-| **R-09** | Remover ou redefinir “tipo de transação” na MLG/ULB. | O campo não existe; não inventar dados. |
-| **R-10** | Corrigir moeda e eixo temporal no dashboard. | O esboço usa R$ e datas que não existem na base. |
-| **R-11** | Criar um dicionário de dados e um registro de decisões. | Rastreabilidade acadêmica. |
-| **R-12** | Confirmar rubrica, prazos e formato com o professor. | Não estão nos materiais fornecidos. |
+| **R-01** | Use MLG/ULB as the main base. | It is the base cited in the presentation, compatible with the sketch and real anonymized data. |
+| **R-02** | Do not use *Give Me Some Credit*. | It is about default risk, not fraud, and has no transactional variables. |
+| **R-03** | Do not mix bases. | Mixing sources confuses results and conclusions. |
+| **R-04** | If using the synthetic base, label it as synthetic everywhere. | Avoids claims about real fraud. |
+| **R-05** | Adopt AUPRC as the main metric. | Official base recommendation and appropriate for imbalance. |
+| **R-06** | Compare baseline and at least one candidate model. | Avoids choosing Random Forest just because it appears in the sketch. |
+| **R-07** | Use Streamlit unless there is a contrary institutional requirement. | Lower complexity for an academic dashboard in Python. |
+| **R-08** | Build the MVP with the four visualizations before increments. | Controls scope and timeline. |
+| **R-09** | Remove or redefine “transaction type” in MLG/ULB. | The field does not exist; do not invent data. |
+| **R-10** | Fix currency and temporal axis in the dashboard. | The sketch uses R$ and dates that do not exist in the base. |
+| **R-11** | Create a data dictionary and a decision record. | Academic traceability. |
+| **R-12** | Confirm rubric, deadlines, and format with the professor. | Not provided in the materials. |
 
-### 10.3 Pendências
+### 10.3 Pending
 
-| ID | Pendência | Por que importa | Encaminhamento sugerido |
+| ID | Pending item | Why it matters | Suggested path |
 |---|---|---|---|
-| **P-01** | Qual base será usada: MLG/ULB ou sintética 10K? | Muda escopo, métricas, dashboard e narrativa. | **Resolvida (D-10):** MLG/ULB adotada como base única. |
-| **P-02** | O link fornecido para a “Base 2” aponta para um notebook da base sintética, não para a MLG/ULB. Qual era a intenção? | Evita usar a base errada. | **Resolvida (D-10):** o pipeline usa `data/raw/creditcard.csv` (MLG/ULB). |
-| **P-03** | Qual é o público-alvo? | Afeta linguagem, filtros e storytelling. | Definir com o grupo/professor. |
-| **P-04** | Qual ferramenta de dashboard? | Define dependências e arquitetura. | **Resolvida (D-15):** Streamlit. |
-| **P-05** | Haverá aba de predição? | Pode aumentar muito o escopo. | **Fora do MVP (D-18):** incremento futuro; decidir antes de implementar. |
-| **P-06** | Quais modelos e qual limite de decisão? | Define métricas e resultados. | **Definido no pipeline (D-19/D-20):** baseline + RF + boosting; limite por F1 out-of-fold. |
-| **P-07** | Qual estratégia de desbalanceamento? | Afeta desempenho e interpretação. | **Definido no pipeline (D-19):** `class_weight="balanced"`, sem reamostragem. |
-| **P-08** | O filtro “tipo de transação” será removido ou a base será trocada? | Na MLG/ULB o campo não existe. | **Resolvida (D-16):** filtro removido; a interface informa a ausência. |
-| **P-09** | Como tratar o tempo na MLG/ULB? | `Time` é relativo e cobre dois dias. | **Resolvida (D-13):** blocos relativos (hora decorrida, dia relativo). |
-| **P-10** | Qual moeda usar nos gráficos? | O esboço usa R$, a base é europeia. | **Resolvida (D-14):** unidade original, sem símbolo de moeda. |
-| **P-11** | Quais são o formato, os prazos e a rubrica? | Não estão nos materiais; o slide “CALENDÁRIO” da AULA2 não tem datas legíveis. | Confirmar com o professor. |
-| **P-12** | Quais são os papéis e a disponibilidade do grupo? | Afeta cronograma. | Definir responsáveis por etapa. |
-| **P-13** | Como armazenar e versionar os dados? | Evita commits acidentais e perda de versão. | `data/` no `.gitignore`; checksum; cópia bruta. |
-| **P-14** | Qual política de citação e de uso de IA? | Pode afetar a avaliação. | Consultar o professor/orientador. |
-| **P-15** | Os números do mockup podem ser usados como referência visual? | Risco de confundir com resultados. | Usar apenas como layout; nunca como resultado. |
+| **P-01** | Which base is used: MLG/ULB or synthetic 10K? | Changes scope, metrics, dashboard, and narrative. | **Resolved (D-10):** MLG/ULB adopted as the single base. |
+| **P-02** | The provided “Base 2” link points to a notebook of the synthetic base, not to MLG/ULB. What was the intention? | Avoids using the wrong base. | **Resolved (D-10):** the pipeline uses `data/raw/creditcard.csv` (MLG/ULB). |
+| **P-03** | What is the target audience? | Affects language, filters, and narrative. | Define with the group/professor. |
+| **P-04** | What dashboard tool? | Defines dependencies and architecture. | **Resolved (D-15):** Streamlit. |
+| **P-05** | Will there be a prediction tab? | Can greatly increase scope. | **Out of MVP (D-18):** future increment; decide before implementation. |
+| **P-06** | Which models and decision threshold? | Defines metrics and results. | **Defined in pipeline (D-19/D-20):** baseline + RF + boosting; threshold by F1 out-of-fold. |
+| **P-07** | What imbalance strategy? | Affects performance and interpretation. | **Defined in pipeline (D-19):** `class_weight="balanced"`, no resampling. |
+| **P-08** | Will the “transaction type” filter be removed or should the base change? | MLG/ULB has no such field. | **Resolved (D-16):** filter removed; interface reports the absence. |
+| **P-09** | How to treat time in MLG/ULB? | `Time` is relative and covers two days. | **Resolved (D-13):** relative blocks (elapsed hour, relative day). |
+| **P-10** | Which currency in the graphs? | The sketch uses R$ and the base is in euros. | **Resolved (D-14):** original unit, no currency symbol. |
+| **P-11** | Format, deadlines, and rubric? | Not in the materials; the Aula 2 “CALENDAR” slide has no readable dates. | Confirm with the professor. |
+| **P-12** | Group roles and data storage/versioning? | Affects the schedule. | Define responsible persons per step. |
+| **P-13** | Data storage and versioning? | Avoids accidental commits and lost versions. | `data/` in `.gitignore`; checksum; raw copy. |
+| **P-14** | AI citation and use policy? | Can affect the grade. | Consult the professor/advisor. |
+| **P-15** | Can sketch numbers be used as visual reference? | Risk of confusing with results. | Use only as layout; never as results. |
 
-### 10.4 Decisões que não devem ser tomadas por suposição
+### 10.4 Decisions that must not be made by assumption
 
-- não assumir que a base sintética é a base da apresentação;
-- não assumir que “R$” é a moeda correta;
-- não assumir que `Time = 0` é meia-noite;
-- não assumir que o modelo será Random Forest;
-- não assumir que a acurácia é a métrica principal;
-- não assumir que a aba de predição faz parte do MVP;
-- não assumir que o dashboard será publicado na internet;
-- não assumir que o público são clientes finais;
-- não assumir que as métricas do mockup são reais.
+- do not assume the synthetic base is the presentation's base;
+- do not assume “R$” is the correct currency;
+- do not assume `Time = 0` is midnight;
+- do not assume the model is Random Forest;
+- do not assume accuracy is the main metric;
+- do not assume the prediction tab is part of the MVP;
+- do not assume the dashboard is published on the internet;
+- do not assume the audience is end customers;
+- do not assume the sketch metrics are real.
 
 ---
 
-## 11. Entregáveis previstos
+## 11. Planned deliverables
 
-| ID | Entregável | Tipo | Etapa | Status |
+| ID | Deliverable | Type | Step | Status |
 |---|---|---|---|---|
-| **EN-01** | `AGENTS.md` com contexto do projeto | Documentação | E1 | **Criado nesta etapa** |
-| **EN-02** | `docs/PROJECT_PLAN.md` | Documentação | E1 | **Criado nesta etapa** |
-| **EN-03** | Dicionário de dados e registro de proveniência | Dados | E2 | **Concluído** — `docs/DATA_DICTIONARY.md` |
-| **EN-04** | Base tratada + relatório de qualidade | Dados | E3 | **Concluído** — `data/processed/` e `reports/RELATORIO_QUALIDADE.md` |
-| **EN-05** | Notebook/relatório de EDA com figuras | Análise | E4 | **Concluído** — `reports/RELATORIO_EDA.md` e figuras |
-| **EN-06** | Pipeline de features e conjuntos treino/teste | Modelagem | E5 | **Concluído** — `features/` |
-| **EN-07** | Modelo treinado + experimentos | Modelagem | E6 | **Concluído** — `models/` e `reports/model/metricas.json` |
-| **EN-08** | Relatório de avaliação + modelo documentado | Modelagem | E7 | **Concluído** — `reports/RELATORIO_MODELO.md` |
-| **EN-09** | Dashboard interativo | Produto | E8 | **Concluído** — `presentation/app.py` |
-| **EN-10** | Repositório integrado + validação | Engenharia | E9 | Parcial — testes e lint executados; revisão final pendente |
-| **EN-11** | Relatório final | Acadêmico | E10 | Planejado; formato pendente |
-| **EN-12** | Apresentação/slides + demo | Acadêmico | E10 | Planejado; formato pendente |
-| **EN-13** | Código, testes e instruções de execução | Engenharia | E9–E10 | **Concluído** — README e suíte pytest |
-| **EN-14** | `docs/ARCHITECTURE.md` | Documentação | E1 | **Criado nesta etapa** |
+| **EN-01** | `AGENTS.md` with project context | Documentation | E1 | **Created in this phase** |
+| **EN-02** | `docs/PROJECT_PLAN.md` | Documentation | E1 | **Created in this phase** |
+| **EN-03** | Data dictionary and provenance record | Data | E2 | **Completed** — `docs/DATA_DICTIONARY.md` |
+| **EN-04** | Treated base + quality report | Data | E3 | **Completed** — `data/processed/` and `reports/RELATORIO_QUALIDADE.md` |
+| **EN-05** | EDA notebook/report with figures | Analysis | E4 | **Completed** — `reports/RELATORIO_EDA.md` and figures |
+| **EN-06** | Feature pipeline and train/test sets | Modeling | E5 | **Completed** — `features/` |
+| **EN-07** | Trained model + experiments | Modeling | E6 | **Completed** — `models/` and `reports/model/metrics.json` |
+| **EN-08** | Evaluation report + documented model | Modeling | E7 | **Completed** — `reports/RELATORIO_MODELO.md` |
+| **EN-09** | Interactive dashboard | Product | E8 | **Completed** — `presentation/app.py` |
+| **EN-10** | Integrated repo + validation | Engineering | E9 | Partial — tests and lint executed; final review pending |
+| **EN-11** | Final report | Academic | E10 | Planned; format pending |
+| **EN-12** | Slides + demo | Academic | E10 | Planned; format pending |
+| **EN-13** | Code, tests, and run instructions | Engineering | E9–E10 | **Completed** — README and pytest suite |
+| **EN-14** | `docs/ARCHITECTURE.md` | Documentation | E1 | **Created in this phase** |
 
-**Entregáveis acadêmicos não especificados:** não há, nos materiais fornecidos, indicação de formato (PDF, artigo, vídeo, banca), número de páginas, prazo ou rubrica. Confirmar antes de iniciar E10.
+**Academic deliverables not specified:** in the materials, there is no indication of format (PDF, article, video, use), page count, deadline, or rubric. Confirm before starting E10.
 
 ---
 
-## 12. Matriz de rastreabilidade
+## 12. Traceability matrix
 
-| Requisito | Fonte | Etapa | Evidência de conclusão |
+| Requirement | Source | Step | Evidence of completion |
 |---|---|---|---|
-| RF-01 | APRES, p. 9 | E1–E2 | Link, versão e checksum registrados |
-| RF-02 | APRES, p. 9 | E3 | Base tratada + log de transformações |
-| RF-03 | APRES, p. 5 | E4 | EDA com comparação fraudes × não fraudes |
-| RF-04 | APRES, p. 5 e 10 | E4/E8 | Gráfico de fraudes por faixa de valor |
-| RF-05 | APRES, p. 6 | E4/E8 | Série temporal + heatmap |
-| RF-06 | APRES, p. 10 | E8 | Quatro visualizações no dashboard |
-| RF-07 | Mockup | E1/E8 | Filtros implementados ou redefinidos |
-| RF-08 | APRES, p. 11 | E6 | Modelo treinado |
-| RF-09 | APRES, p. 11 | E7 | Métricas + interpretação |
-| RF-10 | Mockup | E8 | KPIs no dashboard |
-| RF-11 | Mockup | E1/E8 | Aba de predição decidida e implementada ou descartada |
-| RF-12 | Recomendado | E9 | README + pipeline reproduzível |
-| RNF-01 a RNF-10 | Ver Seção 3.2 | E1–E10 | Checklist da Seção 9 |
+| RF-01 | APRES, p. 9 | E1–E2 | Link, version, and checksum recorded |
+| RF-02 | APRES, p. 9 | E3 | Treated base + log of transformations |
+| RF-03 | APRES, p. 5 | E4 | EDA with frauds vs non-frauds comparison |
+| RF-04 | APRES, p. 5 and 10 | E4/E8 | Graph of frauds by value band |
+| RF-05 | APRES, p. 6 | E4/E8 | Time series + heatmap |
+| RF-06 | APRES, p. 10 | E8 | Four visualizations in the dashboard |
+| RF-07 | Sketch | E1/E8 | Filters implemented or redefined |
+| RF-08 | APRES, p. 11 | E6 | Model trained |
+| RF-09 | APRES, p. 11 | E7 | Metrics + interpretation |
+| RF-10 | Sketch | E8 | KPIs in the dashboard |
+| RF-11 | Sketch | E1/E8 | Prediction tab decided and implemented or discarded |
+| RF-12 | Recommended | E9 | README + reproducible pipeline |
+| RNF-01 to RNF-10 | See Section 3.2 | E1–E10 | Section 9 checklist |
 
 ---
 
-## 13. Próximos passos imediatos
+## 13. Immediate next steps
 
-1. **Revisar os resultados com o grupo:** conferir os relatórios gerados
-   (`reports/RELATORIO_QUALIDADE.md`, `reports/RELATORIO_EDA.md` e
-   `reports/RELATORIO_MODELO.md`) e validar as decisões D-10 a D-25.
-2. **Confirmar com o professor (P-11/P-14):** rubrica, prazos, formato de entrega
-   e política de uso de IA.
-3. **Definir o público-alvo (P-03):** a hipótese de analistas/gestores de risco
-   ainda não foi validada.
-4. **Decidir sobre a aba de predição (P-05):** está fora do MVP (D-18); se for
-   incluída, deve reutilizar o pipeline salvo em `reports/model/`.
-5. **Preparar os entregáveis acadêmicos (E10):** relatório, slides e roteiro da
-   demo, com os números recalculados pelo pipeline.
-6. **Revisão final (E9):** executar o pipeline em ambiente limpo, rodar testes e
-   lint e revisar os checklists da Seção 9.
+1. **Review results with the group:** check the generated reports
+   (`reports/RELATORIO_QUALIDADE.md`, `reports/RELATORIO_EDA.md`, and
+   `reports/RELATORIO_MODELO.md`) and validate the decisions D-10 to D-29.
+2. **Confirm with the professor (P-11/P-14):** rubric, deadlines, delivery
+   format, and AI use policy.
+3. **Define the target audience (P-03):** the hypothesis of risk/fraud
+   analysts and risk managers is not yet validated.
+4. **Decide about the prediction tab (P-05):** out of MVP (D-18); if
+   included, reuse the saved pipeline in `reports/model/`.
+5. **Prepare the academic deliverables (E10):** report, slides, and demo
+   script, with the numbers recalculated by the pipeline.
+6. **Final review (E9):** run the pipeline in a clean environment, run
+   tests and lint, and review the Section 9 checklists.
 
 ---
 
-## Apêndice A — Conferência do esboço do dashboard
+## Appendix A — Dashboard sketch reconciliation
 
-O esboço da APRES, p. 10, é útil como referência visual, mas **não é um resultado validado**. A tabela abaixo compara os valores do esboço com a base MLG/ULB real, conferida em 17/11/2026.
+The sketch from APRES, p. 10 is useful as visual reference, but **it is not a validated result**. The table below compares the sketch values with the real MLG/ULB base, verified on 17/11/2026.
 
-| Item do esboço | Valor no esboço | Conferência na MLG/ULB | Conclusão |
+| Sketch item | Sketch value | MLG/ULB check | Conclusion |
 |---|---|---|---|
-| Total de transações | 284.907 | 284.807 | Provável erro de digitação; o donut soma 284.315 + 492 = 284.807. |
-| Fraudes | 492 | 492 | Correto. |
-| Taxa de fraude | 0,17% | 0,1727% | Correto com arredondamento. |
-| Não fraudes | 284.315 | 284.315 | Correto. |
-| Valor movimentado | R$ 25 Mi | 25.162.590,01 na unidade original | Ordem de grandeza compatível, mas a moeda “R$” não está justificada; a base é de cartões europeus. |
-| Fraudes por faixa (0–10, 10–50, 50–100, 100–250, 250–500, 500–1k, 1k+) | 130, 70, 45, 100, 70, 55, 22 | 249, 56, 57, 56, 39, 26, 9 | O gráfico do esboço não corresponde à distribuição real. Não reutilizar. |
-| Insight “70% das fraudes abaixo de R$ 250” | 70% | 85,0% das fraudes têm valor ≤ 250; 73,6% ≤ 100 | O insight do esboço não confere. Recalcular. |
-| Métricas do modelo | 99% acurácia, 94% precisão, 92% recall, 93% F1 | Não validadas | O esboço diz “ilustrativo”; recalcular e documentar. |
-| Matriz de confusão | TN 56.858; FP 6; FN 8; TP 90 | Consistente com um teste de ~20% (56.962 linhas, 98 fraudes), mas não validada | Pode ser um resultado real ou uma simulação; não usar sem reprodução. |
-| Importância das variáveis | V14 18%, V10 11%, V17 10% | Não validada | O esboço diz “valores ilustrativos”; recalcular. |
-| Filtro “Tipo de transação” | Presente | Inexistente na MLG/ULB | Remover ou trocar de base. |
-| Período “01/01/2024–30/04/2025” | Presente | Inexistente; a base cobre dois dias de 2013 em tempo relativo | Corrigir o eixo; não inventar datas. |
-| Heatmap “0h–21h” | Presente | `Time` é relativo; a origem não é meia-noite documentada | Declarar a premissa ou usar blocos relativos. |
-| “Risco alto: bloquear e investigar” | Presente | Não é uma política do projeto | Tratar como ilustração de UI, não como funcionalidade. |
+| Transactions | 284,907 | 284,807 | Probable typo; the donut sums 284,315 + 492 = 284,807. |
+| Frauds | 492 | 492 | Correct. |
+| Fraud rate | 0.17% | 0.1727% | Correct with rounding. |
+| Non-frauds | 284,315 | 284,315 | Correct. |
+| Volume moved | R$ 25 million | 25,162,590.01 in original unit | Same order of magnitude, but “R$” is not justified; the base is European cards. |
+| Frauds by band (0–10, 10–50, 50–100, 100–250, 250–500, 500-1k, 1k+) | 130, 70, 45, 100, 70, 55, 22 | 249, 56, 57, 56, 39, 26, 9 | The sketch graph does not match the real distribution. Do not reuse. |
+| Insight “70% of frauds below R$ 250” | 70% | 85.0% of frauds with value ≤ 250; 73.6% ≤ 100 | The sketch insight does not check. Recompute. |
+| Model metrics | 99% accuracy, 94% precision, 92% recall, 93% F1 | Not validated | The sketch says “illustrative”; recompute and document. |
+| Confusion matrix | TN 56,858; FP 6; FN 8; TP 90 | Consistent with a test of about 20% (56,962 rows, 98 frauds), but not validated | Can be a real result or a simulation; do not use without reproduction. |
+| Variable importance | V14 18%, V10 11%, V17 10% | Not validated | The sketch says “values illustrative”; recompute. |
+| “Transaction type” filter | Present | Does not exist in MLG/ULB | Remove or switch base. |
+| Period “01/01/2024–30/04/2025” | Present | Does not exist; base covers two days of 2013 in relative time | Correct the axis; do not invent dates. |
+| Heatmap “0h–21h” | Present | `Time` is relative; origin not documented as midnight | State the premise or use relative blocks. |
+| “High risk: block and investigate” | Present | Not a project policy | Treat as UI illustration, not as functionality. |
 
-**Regra:** o esboço serve para layout e inspiração. Nenhum número, insight ou métrica dele deve ir para o relatório sem recálculo e documentação.
+**Rule:** the sketch serves for layout and inspiration. No number, insight, or metric from it may enter the report without recomputation and documentation.
 
 ---
 
-## Apêndice B — Dicionário de dados resumido
+## Appendix B — Summary data dictionary
 
 ### B.1 MLG/ULB — *Credit Card Fraud Detection*
 
-| Coluna | Tipo | Descrição |
+| Column | Type | Description |
 |---|---|---|
-| `Time` | numérico | Segundos desde a primeira transação da base; não é data/hora absoluta. |
-| `V1`–`V28` | numérico | Componentes principais (PCA) anonimizados; significado original não divulgado. |
-| `Amount` | numérico | Valor da transação. |
-| `Class` | binário | 1 = fraude; 0 = legítima. |
+| `Time` | numeric | Seconds since the first transaction in the base; not absolute date/time. |
+| `V1`–`V28` | numeric | Anonymized principal components (PCA); original meaning not disclosed. |
+| `Amount` | numeric | Transaction value. |
+| `Class` | binary | 1 = fraud; 0 = legitimate. |
 
-### B.2 Sintética — *Credit Card Fraud Detection Dataset* (10K)
+### B.2 Synthetic — *Credit Card Fraud Detection Dataset* (10K)
 
-| Coluna | Tipo | Descrição |
+| Column | Type | Description |
 |---|---|---|
-| `transaction_id` | inteiro | Identificador da transação. |
-| `amount` | numérico | Valor da transação. |
-| `transaction_hour` | inteiro | Hora da transação (0–23). |
-| `merchant_category` | categórico | Categoria do comerciante (5 valores). |
-| `foreign_transaction` | binário | Transação internacional (0/1). |
-| `location_mismatch` | binário | Incompatibilidade entre localização de cobrança e transação (0/1). |
-| `device_trust_score` | numérico | Confiança do dispositivo (0–100). |
-| `velocity_last_24h` | inteiro | Número de transações nas últimas 24 horas. |
-| `cardholder_age` | inteiro | Idade do portador. |
-| `is_fraud` | binário | 1 = fraude; 0 = legítima. |
+| `transaction_id` | integer | Transaction identifier. |
+| `amount` | numeric | Transaction value. |
+| `transaction_hour` | integer | Transaction hour (0–23). |
+| `merchant_category` | categorical | Merchant category (5 values). |
+| `foreign_transaction` | binary | International transaction (0/1). |
+| `location_mismatch` | binary | Mismatch between billing location and transaction (0/1). |
+| `device_trust_score` | numeric | Device trust (0–100). |
+| `velocity_last_24h` | integer | Number of transactions in the last 24 hours. |
+| `cardholder_age` | integer | Age of the cardholder. |
+| `is_fraud` | binary | 1 = fraud; 0 = legitimate. |
 
 ### B.3 Give Me Some Credit
 
-| Coluna | Descrição |
+| Column | Description |
 |---|---|
-| `SeriousDlqin2yrs` | Pessoa ficou 90 dias ou mais em atraso em dois anos (alvo). |
-| `RevolvingUtilizationOfUnsecuredLines` | Uso de crédito rotativo não garantido. |
-| `age` | Idade. |
-| `NumberOfTime30-59DaysPastDueNotWorse` | Número de atrasos de 30–59 dias. |
-| `DebtRatio` | Dívida mensal dividida pela renda bruta. |
-| `MonthlyIncome` | Renda mensal. |
-| `NumberOfOpenCreditLinesAndLoans` | Linhas de crédito e empréstimos abertos. |
-| `NumberOfTimes90DaysLate` | Número de atrasos de 90 dias ou mais. |
-| `NumberRealEstateLoansOrLines` | Empréstimos imobiliários e linhas de crédito. |
-| `NumberOfTime60-89DaysPastDueNotWorse` | Número de atrasos de 60–89 dias. |
-| `NumberOfDependents` | Número de dependentes. |
+| `SeriousDlqin2yrs` | Person 90+ days overdue in two years (target). |
+| `RevolvingUtilizationOfUnsecuredLines` | Use of rotating unsecured credit. |
+| `age` | Age. |
+| `NumberOfTime30-59DaysPastDueNotWorse` | Defaults of 30–59 days. |
+| `DebtRatio` | Monthly debt divided by gross income. |
+| `MonthlyIncome` | Monthly income. |
+| `NumberOfOpenCreditLinesAndLoans` | Open credit lines and loans. |
+| `NumberOfTimes90DaysLate` | Number of 90+ days defaults. |
+| `NumberRealEstateLoansOrLines` | Real estate loans and lines of credit. |
+| `NumberOfTime60-89DaysPastDueNotWorse` | Defaults of 60–89 days. |
+| `NumberOfDependents` | Number of dependents. |
 
 ---
 
-## Apêndice C — Referências
+## Appendix C — References
 
-- DAL POZZOLO, Andrea; CAELEN, Olivier; JOHNSON, Reid A.; BONTEMPI, Gianluca. **Credit Card Fraud Detection Dataset**. Kaggle, 2015. Disponível em: https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud. Acesso em: 17 nov. 2026.
-- GÉRON, Aurélien. **Mãos à obra: aprendizado de máquina com Scikit-Learn, Keras e TensorFlow**. 2. ed. Rio de Janeiro: Alta Books, 2021.
-- KAGGLE. **Give Me Some Credit**. Disponível em: https://www.kaggle.com/c/GiveMeSomeCredit. Acesso em: 17 nov. 2026.
-- KAGGLE. **Credit Card Fraud Detection Dataset** (`miadul/credit-card-fraud-detection-dataset`). Disponível em: https://www.kaggle.com/datasets/miadul/credit-card-fraud-detection-dataset. Acesso em: 17 nov. 2026.
-- NILSON REPORT. **Payment Card Fraud Worldwide**. Edição 1298, jan. 2026. Disponível em: https://nilsonreport.com/newsletters/1298/. Acesso em: 17 nov. 2026.
-- OLIVEIRA, Vinicius Dias. Métodos de machine learning na detecção de fraude em cartão de crédito: um estudo comparado. **Revista Científica ACERTTE**, v. 5, n. 9, 2025. Disponível em: https://acertte.org/acertte/article/view/265. Acesso em: 17 nov. 2026.
-- PROVOST, Foster; FAWCETT, Tom. **Data Science para negócios: o que você precisa saber sobre mineração de dados e pensamento analítico de dados**. Rio de Janeiro: Alta Books, 2016.
-- SANTOS, Aline Bertolazo dos; SANTOS, Isadora Disposti Bueno dos; TOMA, Karina Mitiko. **Detecção de transações fraudulentas com cartão de crédito**. Disponível em: https://ojs.focopublicacoes.com.br/foco/article/view/8328. Acesso em: 17 nov. 2026.
-- SENAC. **Introdução à Ciência de Dados — Webconferência 2** (`aula2.pdf`). Material da disciplina, 2026.
-- SENAC. **Códigos da Aula 2** (`Codigos_Aula2.zip`). Material da disciplina, 2026.
+- DAL POZZOLO, Andrea; CAELEN, Olivier; JOHNSON, Reid A.; BONTEMPI, Gianluca. **Credit Card Fraud Detection Dataset**. Kaggle, 2015. Available at: https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud. Accessed: 17 Nov. 2026.
+- GÉRON, Aurélien. **Hands-On Machine Learning with Scikit-Learn, Keras and TensorFlow**. 2. ed. Rio de Janeiro: Alta Books, 2021.
+- KAGGLE. **Give Me Some Credit**. Available at: https://www.kaggle.com/c/GiveMeSomeCredit. Accessed: 17 Nov. 2026.
+- KAGGLE. **Credit Card Fraud Detection Dataset** (`miadul/credit-card-fraud-detection-dataset`). Available at: https://www.kaggle.com/datasets/miadul/credit-card-fraud-detection-dataset. Accessed: 17 Nov. 2026.
+- NILSON REPORT. **Payment Card Fraud Worldwide**. Ed. 1298, Jan. 2026. Available at: https://nilsonreport.com/newsletters/1298/. Accessed: 17 Nov. 2026.
+- OLIVEIRA, Vinicius Dias. Methods of machine learning in credit card fraud detection: a comparative study. **Revista Científica ACERTTE**, v. 5, n. 9, 2025. Available at: https://acertte.org/acertte/article/view/265. Accessed: 17 Nov. 2026.
+- PROVOST, Foster; FAWCETT, Tom. **Data Science for Business: What You Need to Know About Data Mining and Data Analytic Thinking**. Rio de Janeiro: Alta Books, 2016.
+- SANTOS, Aline Bertolazo dos; SANTOS, Isadora Disposti Bueno dos; TOMA, Karina Mitiko. **Fraudulent credit card transactions: a comparative machine learning study**. Available at: https://ojs.focopublicacoes.com.br/foco/article/view/8328. Accessed: 17 Nov. 2026.
+- SENAC. **Introduction to Data Science — Webconference 2** (`aula2.pdf`). Course material, 2026.
+- SENAC. **Códigos da Aula 2** (`Codigos_Aula2.zip`). Course material, 2026.

@@ -4,7 +4,7 @@
 
 | Item | Valor |
 |---|---|
-| Base | MLG/ULB preparada (`data/processed/transacoes.parquet`) |
+| Base | MLG/ULB preparada (`data/processed/transactions.parquet`) |
 | Atributos | `Time`, `V1`–`V28`, `Amount` (30 atributos) |
 | Alvo | `Class` (1 = fraude) |
 | Semente | 42 |
@@ -27,7 +27,7 @@ A seleção usa a maior AUPRC média (R-05), não a acurácia. Na tabela de vali
 cruzada, precisão, recall e F1 usam o limiar padrão de 0,5 apenas para comparação;
 o modelo final é avaliado com o limiar escolhido no treino.
 
-![Comparação dos modelos](figures/modelo_01_comparacao.png)
+![Comparação dos modelos](figures/modelo_01_comparison.png)
 
 ## 3. Avaliação no holdout
 
@@ -49,9 +49,9 @@ o modelo final é avaliado com o limiar escolhido no treino.
 | Real legítima | 56.637 | 14 |
 | Real fraude | 23 | 72 |
 
-![Curva precisão-recall](figures/modelo_02_curva_precisao_recall.png)
+![Curva precisão-recall](figures/modelo_02_precision_recall_curve.png)
 
-![Matriz de confusão](figures/modelo_03_matriz_confusao.png)
+![Matriz de confusão](figures/modelo_03_confusion_matrix.png)
 
 ## 4. Fatores associados
 
@@ -68,7 +68,7 @@ o modelo final é avaliado com o limiar escolhido no treino.
 | V2 | 0,0273 |
 | V7 | 0,0254 |
 
-![Importância das variáveis](figures/modelo_04_importancia_variaveis.png)
+![Importância das variáveis](figures/modelo_04_feature_importances.png)
 
 Os atributos são componentes PCA anonimizados. A importância indica contribuição
 para o modelo nesta base, não um fator de negócio nomeável. `Time` é relativo e

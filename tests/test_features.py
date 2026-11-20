@@ -1,39 +1,39 @@
-"""Testes da preparação de atributos e do split."""
+"""Attribute preparation and split tests."""
 
 from __future__ import annotations
 
 import pandas as pd
 
-from projeto_integrador.config import COLUNA_ALVO, COLUNAS_MODELO
-from projeto_integrador.features.dataset import construir_matriz, dividir_treino_teste
+from credit_card_fraud.config import MODEL_COLUMNS, TARGET_COLUMN
+from credit_card_fraud.features.dataset import build_matrix, split_train_test
 
 
-def test_construir_matriz(transacoes_sinteticas: pd.DataFrame) -> None:
-    atributos, alvo = construir_matriz(transacoes_sinteticas)
+def test_build_matrix(synthetic_transactions: pd.DataFrame) -> None:
+    features, target = build_matrix(synthetic_transactions)
 
-    assert list(atributos.columns) == COLUNAS_MODELO
-    assert len(atributos) == len(alvo) == 400
-    assert alvo.name == COLUNA_ALVO
-    assert set(alvo.unique()) == {0, 1}
-    assert not atributos.isna().any().any()
+    assert list(features.columns) == MODEL_COLUMNS
+    assert len(features) == len(target) == 400
+    assert target.name == TARGET_COLUMN
+    assert set(target.unique()) == {0, 1}
+    assert not features.isna().any().any()
 
 
-def test_split_estratificado(transacoes_sinteticas: pd.DataFrame) -> None:
-    atributos, alvo = construir_matriz(transacoes_sinteticas)
-    atributos_treino, atributos_teste, alvo_treino, alvo_teste = dividir_treino_teste(
-        atributos, alvo, proporcao_teste=0.2
+def test_stratified_split(synthetic_transactions: pd.DataFrame) -> None:
+    features, target = build_matrix(synthetic_transactions)
+    features_train, features_test, target_train, target_test = split_train_test(
+        features, target, test_size=0.2
     )
 
-    assert len(atributos_teste) == 80
-    assert len(atributos_treino) == 320
-    assert not set(atributos_treino.index) & set(atributos_teste.index)
-    assert alvo_teste.sum() == 2
-    assert alvo_treino.sum() == 10
+    assert len(features_test) == 80
+    assert len(features_train) == 320
+    assert not set(features_train.index) & set(features_test.index)
+    assert target_test.sum() == 2
+    assert target_train.sum() == 10
 
 
-def test_split_reprodutivel(transacoes_sinteticas: pd.DataFrame) -> None:
-    atributos, alvo = construir_matriz(transacoes_sinteticas)
-    primeiro = dividir_treino_teste(atributos, alvo, semente=42)
-    segundo = dividir_treino_teste(atributos, alvo, semente=42)
+def test_split_reproducible(synthetic_transactions: pd.DataFrame) -> None:
+    features, target = build_matrix(synthetic_transactions)
+    first = split_train_test(features, target, seed=42)
+    second = split_train_test(features, target, seed=42)
 
-    assert primeiro[1].index.equals(segundo[1].index)
+    assert first[1].index.equals(second[1].index)

@@ -1,4 +1,4 @@
-"""Fixtures compartilhadas pelos testes."""
+"""Shared fixtures across tests."""
 
 from __future__ import annotations
 
@@ -6,29 +6,29 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from projeto_integrador.config import COLUNAS_PCA
+from credit_card_fraud.config import PCA_COLUMNS
 
 
 @pytest.fixture
-def transacoes_sinteticas() -> pd.DataFrame:
-    """Base pequena com o mesmo esquema da MLG/ULB, para testes rápidos."""
-    gerador = np.random.default_rng(42)
-    quantidade = 400
+def synthetic_transactions() -> pd.DataFrame:
+    """Small base with the same schema as MLG/ULB, for fast tests."""
+    generator = np.random.default_rng(42)
+    quantity = 400
 
-    dados: dict[str, np.ndarray] = {
-        "Time": np.sort(gerador.uniform(0, 172_800, quantidade)),
-        "Amount": np.round(gerador.lognormal(3, 1.2, quantidade), 2),
+    data: dict[str, np.ndarray] = {
+        "Time": np.sort(generator.uniform(0, 172_800, quantity)),
+        "Amount": np.round(generator.lognormal(3, 1.2, quantity), 2),
     }
-    for coluna in COLUNAS_PCA:
-        dados[coluna] = gerador.normal(size=quantidade)
+    for column in PCA_COLUMNS:
+        data[column] = generator.normal(size=quantity)
 
-    alvo = np.zeros(quantidade, dtype="int64")
-    alvo[gerador.choice(quantidade, size=12, replace=False)] = 1
-    dados["Class"] = alvo
+    target = np.zeros(quantity, dtype="int64")
+    target[generator.choice(quantity, size=12, replace=False)] = 1
+    data["Class"] = target
 
-    transacoes = pd.DataFrame(dados)
-    transacoes.loc[0, "Amount"] = 0.0
-    transacoes.loc[1, "Amount"] = 10.0
-    transacoes.loc[2, "Amount"] = 100.0
-    transacoes.loc[3, "Amount"] = 1_000.0
-    return transacoes
+    transactions = pd.DataFrame(data)
+    transactions.loc[0, "Amount"] = 0.0
+    transactions.loc[1, "Amount"] = 10.0
+    transactions.loc[2, "Amount"] = 100.0
+    transactions.loc[3, "Amount"] = 1_000.0
+    return transactions

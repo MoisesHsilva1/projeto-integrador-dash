@@ -1,15 +1,15 @@
-# Arquitetura proposta do dashboard
+# Proposals for the dashboard architecture
 
 **Grupo 54 — Centro Universitário SENAC**
 
-- **Status:** proposta de arquitetura **implementada no MVP**. O caminho em camadas, as regras de dependência e a trilha offline de ML estão refletidos no código em `src/projeto_integrador/`, nos testes e nos relatórios gerados.
-- **Objeto:** descrever o caminho pelo qual o dataset preparado alimenta o dashboard, sem antecipar decisões ainda pendentes.
-- **Referência canônica:** este é o documento de referência do desenho em camadas. O resumo está na Seção 6.2.1 de [`PROJECT_PLAN.md`](PROJECT_PLAN.md); o contexto operacional está em [`../AGENTS.md`](../AGENTS.md).
-- **Idioma:** a interface do dashboard é em inglês; documentação, identificadores e comentários de código permanecem em português, conforme **D-09** (Seção 10.1 do plano).
+- **Status:** **implemented MVP** of the architecture **proposal**. The layered path, the dependency rules, and the offline ML trail are reflected in the code of `src/credit_card_fraud/`, the tests, and the generated reports.
+- **Object:** describe the path by which the prepared dataset feeds the dashboard, without anticipating pending decisions.
+- **Canonical reference:** this is the reference document of the layered design. The summary is in Section 6.2.1 of [`PROJECT_PLAN.md`](PROJECT_PLAN.md); the operational context is in [`../AGENTS.md`](../AGENTS.md).
+- **Language:** the dashboard interface is in **Brazilian Portuguese (pt-BR)**; documentation, identifiers, and code comments remain in English, per **D-26** (revoking D-09/D-17).
 
-> **Atualização:** **P-01** foi resolvida pela **D-10** (base MLG/ULB) e **P-04** pela **D-15** (Streamlit). O desenho continua válido e foi implementado; a base sintética não é usada. Ver [`DECISIONS.md`](DECISIONS.md).
+> **Update:** **P-01** was resolved by **D-10** (base MLG/ULB) and **P-04** by **D-15** (Streamlit). The design remains valid and was implemented; the synthetic base is not used. See [`DECISIONS.md`](DECISIONS.md).
 
-## 1. Fluxo canônico
+## 1. Canonical flow
 
 ```text
 Prepared Dataset (CSV)
@@ -44,61 +44,58 @@ Presentation Layer
 Interactive Dashboard
 ```
 
-O fluxo representa o **caminho de serviço do dashboard**. `Prepared Dataset (CSV)` é o artefato tratado e documentado na etapa E3, normalmente em `data/processed/`; nomes de colunas, unidades, moeda e eixo temporal dependem da base escolhida em P-01 e não são fixados aqui. O fluxo também não pressupõe nenhuma API de interface: a ferramenta será decidida em P-04.
+The flow represents the dashboard's **service path**. `Prepared Dataset (CSV)` is the treated artifact and documented at step E3, usually in `data/processed/`; column names, units, currency, and time axis depend on the base chosen at P-01 and are not fixed here. The flow also does not assume any interface API: the tool is decided at P-04.
 
-## 2. Camadas
+## 2. Layers
 
-| Camada | Responsabilidade | Mapeamento proposto no repositório | Dependência a jusante permitida | Não deve |
+| Layer | Responsibility | Mapped repository path | Allowed downstream | Should not |
 |---|---|---|---|---|
-| **Presentation Layer** | Renderizar páginas, filtros, KPIs, gráficos e tabelas e converter interações do usuário em solicitações para a Application Layer. | `src/projeto_integrador/presentation/` — implementado; absorve `viz/` e `dashboard/` da proposta anterior. | `Application Layer` | Não ler CSVs; não acessar `Data Access` diretamente; não calcular métricas ou agregações próprias; não conter regras analíticas; não depender de `models/` nem de biblioteca de ML. |
-| **Application Layer** | Orquestrar filtros, expor serviços do dashboard e coordenar o estado da sessão; transformar interações em parâmetros para Analytics/Domain. | `src/projeto_integrador/application/` — implementado. | `Analytics / Domain` | Não calcular métricas nem agregações; não carregar, validar ou cachear dados; não implementar gráficos; não duplicar regras analíticas; não manipular arquivos. |
-| **Analytics / Domain** | Ser a fonte única de verdade de métricas, agregações e regras analíticas, respondendo pelas mesmas definições em notebooks e no dashboard. | `src/projeto_integrador/analytics/` — implementado. | `Data Access` | Não ler arquivos diretamente; não implementar UI nem estado de sessão; não treinar modelos; não duplicar cálculo entre notebook e dashboard; não depender de framework de dashboard. |
-| **Data Access** | Carregar o dataset preparado, validar o esquema esperado e gerenciar cache, isolando detalhes de entrada e saída. | `src/projeto_integrador/data/` — implementado com carga, validação de esquema, cache e auditoria. | `Prepared Dataset (CSV)` | Não calcular indicadores de negócio; não criar filtros de UI; não decidir regras analíticas; não editar `data/raw/`; não implementar regras de outra base. |
-| **Prepared Dataset (CSV)** | Entrada imutável do fluxo: base tratada, com proveniência e dicionário registrados. | `data/processed/` — convenção existente, não versionada. | Nenhuma. | Não ser lido diretamente por Presentation, Application ou Analytics; não ser alterado pelo caminho de leitura; não conter lógica ou regras de negócio. |
+| **Presentation Layer** | Render pages, filters, KPIs, charts, and tables, and convert user interactions into requests for the Application Layer. | `src/credit_card_fraud/presentation/` — implemented; absorbs the previous proposal's `viz/` and `dashboard/`. | `Application Layer` | Not read CSVs; not access `Data Access` directly; not compute metrics or aggregations; not contain analytical rules; not depend on `models/` or on an ML library. |
+| **Application Layer** | Orchestrate filters, expose dashboard services, and coordinate session state; transform interactions into parameters for Analytics/Domain. | `src/credit_card_fraud/application/` — implemented. | `Analytics / Domain` | Not compute metrics or aggregations; not load, validate, or cache data; not implement charts; not duplicate analytical rules; not manipulate files. |
+| **Analytics / Domain** | Be the single source of truth for metrics, aggregations, and analytical rules, answering for the same definitions in notebooks and in the dashboard. | `src/credit_card_fraud/analytics/` — implemented. | `Data Access` | Not read files directly; not implement UI or session state; not train models; not duplicate calculation between notebook and dashboard; not depend on a dashboard framework. |
+| **Data Access** | Load the prepared dataset, validate the expected schema, and manage the cache, isolating input and output details. | `src/credit_card_fraud/data/` — implemented with loading, schema validation, cache, and audit. | `Prepared Dataset (CSV)` | Not compute business indicators; not create UI filters; not decide analytical rules; not edit `data/raw/`; not implement another base's rules. |
+| **Prepared Dataset (CSV)** | Immutable flow entry: treated base, with provenance and dictionary recorded. | `data/processed/` — existing convention, not versioned. | None. | Not be read directly by Presentation, Application, or Analytics; not be modified by the reading path; not contain logic or business rules. |
 
-## 3. Regras obrigatórias
+## 3. Mandatory rules
 
-1. As dependências fluem **apenas para baixo**: `Presentation → Application → Analytics/Domain → Data Access → Prepared Dataset`. Nenhuma camada depende de uma camada superior; os dados retornam para cima, mas as chamadas não invertem.
-2. A **Presentation nunca lê CSVs** e **nunca acessa Data Access diretamente**. Toda entrada de dados passa por `Application → Analytics/Domain → Data Access`.
-3. A **Data Access** é a única responsável por `loading`, `schema validation` e `caching`. O esquema validado deve ser parametrizável conforme a base decidida em P-01.
-4. A **Application** é a única responsável por `filter orchestration`, `dashboard services` e `session state coordination`.
-5. A **Analytics/Domain** é a única fonte de verdade de `metrics`, `aggregations` e `analytical rules`. Notebooks e dashboard devem consumir as mesmas funções ou artefatos, para que os números permaneçam consistentes (RNF-08 e risco R-16 do plano).
-6. Nenhuma regra analítica pode ser duplicada em outra camada: todo número exibido no dashboard deve nascer em Analytics/Domain e ser rastreável até o dataset preparado.
-7. O desenho não fixa biblioteca de UI, mecanismo de estado de sessão nem formato de cache; essas escolhas dependem de P-04 e de decisões posteriores.
+1. Dependencies flow **only downwards**: `Presentation → Application → Analytics/Domain → Data Access → Prepared Dataset`. No layer depends on an upper layer; data returns upwards, but calls do not invert.
+2. **Presentation never reads CSVs** and **never accesses Data Access directly**. All data input goes through `Application → Analytics/Domain → Data Access`.
+3. **Data Access** is the only responsible for `loading`, `schema validation`, and `caching`. The validated schema must be parameterizable according to the base chosen at P-01.
+4. **Application** is the only responsible for `filter orchestration`, `dashboard services`, and `session state coordination`.
+5. **Analytics/Domain** is the single source of truth for `metrics`, `aggregations`, and `analytical rules`. Notebooks and the dashboard must consume the same functions or artifacts, so that the numbers remain consistent (RNF-08 and risk R-16 of the plan).
+6. No analytical rule may be duplicated in another layer: every number displayed in the dashboard must originate in Analytics/Domain and be traceable to the prepared dataset.
+7. The design does not fix the UI library, the session-state mechanism, or the cache format; these choices depend on P-04 and later decisions.
 
-## 4. Onde o Machine Learning se encaixa
+## 4. Where Machine Learning fits
 
-O diagrama de cinco camadas é o **caminho de serviço do dashboard**. Ele não inclui uma camada “ML” no runtime, nem deve ganhar uma sexta camada com esse nome.
+The 5-layer diagram is the dashboard's **service path**. It does not include a "ML" layer at runtime, nor should it gain a sixth layer with that name.
 
-O treino e a avaliação de modelos (etapas **E5–E7**) formam uma **trilha offline**, mantida em `features/` e `models/`. Essa trilha produz artefatos — modelo ajustado, pipeline de features e métricas de avaliação — que são **consumidos pela camada Analytics/Domain**, que os publica ao restante do fluxo como métricas e regras analíticas. A aba de predição, se aprovada em P-05, deve reutilizar o mesmo pipeline de transformação do treino, sem reimplementação paralela.
+Model training and evaluation (steps **E5–E7**) form an **offline trail**, kept in `features/` and `models/`. This trail produces artifacts — a fitted model, feature pipeline, and evaluation metrics — that are **consumed by the Analytics/Domain layer**, publishing them to the rest of the flow as metrics and analytical rules. The prediction tab, if approved at P-05, must reuse the same transformation pipeline as training, without a parallel reimplementation.
 
-Assim, a trilha offline alimenta a arquitetura, mas não altera a direção das dependências do caminho de serviço.
+Thus the offline trail feeds the architecture, but does not change the direction of the service path's dependencies.
 
-## 5. Mapeamento proposto para as pastas
+## 5. Proposed mapping to folders
 
-O mapeamento abaixo refere-se à proposta de estrutura da Seção 6.3 de `PROJECT_PLAN.md` e foi implementado no MVP. O scaffold original (`src/projeto_integrador/main.py`, testes e configuração de Ruff/pytest) permanece funcionando.
+The mapping below refers to the proposal of Section 6.3 of `PROJECT_PLAN.md` and was implemented in the MVP. The original scaffold (`src/credit_card_fraud/main.py`, tests, and Ruff/pytest settings) continues to work.
 
-| Camada / trilha | Pasta proposta | Situação em relação à proposta anterior (6.3) |
+| Layer / trail | Proposed folder | Status relative to the previous proposal (6.3) |
 |---|---|---|
-| **Prepared Dataset** | `data/processed/` | Já prevista como área de dados não versionada; permanece como entrada do fluxo. |
-| **Data Access** | `src/projeto_integrador/data/` | Já proposta para “carga e validação”; passa a incluir explicitamente validação de esquema e cache. |
-| **Analytics / Domain** | `src/projeto_integrador/analytics/` | **Diretório novo proposto** para centralizar métricas, agregações e regras analíticas. |
-| **Application** | `src/projeto_integrador/application/` | **Diretório novo proposto** para filtros, serviços do dashboard e estado da sessão. |
-| **Presentation** | `src/projeto_integrador/presentation/` | **Mudança proposta:** absorve `viz/` (gráficos reutilizáveis) e `dashboard/` (aplicação) da proposta anterior. |
-| **Trilha offline de ML** | `src/projeto_integrador/features/` e `src/projeto_integrador/models/` | Mantidas com seus papéis anteriores (transformações, treino e avaliação). `features/` **não** é renomeada nem absorvida pela Presentation. |
-| **Suporte** | `src/projeto_integrador/config.py` | Mantido para caminhos, sementes e constantes, sem introduzir dependência circular entre camadas. |
+| **Prepared Dataset** | `data/processed/` | Already planned as the non-versioned data area; remains the flow entry. |
+| **Data Access** | `src/credit_card_fraud/data/` | Already proposed as "loading and validation"; explicitly adds schema validation and cache. |
+| **Analytics / Domain** | `src/credit_card_fraud/analytics/` | **New proposed directory** centralizing metrics, aggregations, and analytical rules. |
+| **Application** | `src/credit_card_fraud/application/` | **New proposed directory** for dashboard filters, services, and session state. |
+| **Presentation** | `src/credit_card_fraud/presentation/` | **Proposed change:** absorbs the previous proposal's `viz/` (graphs) and `dashboard/` (application) directories. |
+| **ML offline trail** | `src/credit_card_fraud/features/` and `src/credit_card_fraud/models/` | Kept with their previous roles (transformations, training, evaluation). `features/` is **not** renamed and not absorbed by Presentation. |
+| **Support** | `src/credit_card_fraud/config.py` | Kept for paths, seeds, and constants, without introducing circular inter-layer dependencies. |
 
-**Estrutura implementada:** `analytics/` e `application/` foram criados e `viz/` e `dashboard/` ficaram absorvidos por `presentation/`. A implementação segue as regras de dependência da Seção 3 e está coberta por testes.
+**Implemented structure:** `analytics/` and `application/` were created, and `viz/` and `dashboard/` were absorbed by `presentation/`. The implementation follows the Section 3 dependency rules and is covered by tests.
 
-## 6. Idioma e pendências
+## 6. Language and pending items
 
-### 6.1 Idioma da interface
+### 6.1 Dashboard interface language
 
-Após a decisão **D-26**, todo texto voltado ao usuário do dashboard está em **português brasileiro (pt-BR)**: rótulos de KPIs e filtros, títulos/eixos/legendas de gráficos, cabeçalhos de tabelas, navegação, mensagens e estados vazios ou de erro. A regra anterior de interface em inglês (D-09/D-17) foi revogada. Documentação, identificadores e comentários de código permanecem em português. A regra vale para rótulos de interface, não para valores brutos provenientes da base escolhida.
+After the **D-26** decision, all text aimed at the user of the dashboard is in **Brazilian Portuguese (pt-BR)**: KPIs and filter labels, graph titles/axes/legends, table headers, navigation, messages, and empty or error states. The earlier interface-in-English rule (D-09/D-17) is revoked. Documentation, identifiers, and code comments are in English, following the language standardization applied to the codebase and the project documentation. The rule applies to interface labels, not raw base values from the chosen base.
 
-### 6.2 Pendências que limitam o desenho
+### 6.2 Pending items limiting the design
 
-**P-01** e **P-04** foram resolvidas por D-10 (MLG/ULB) e D-15 (Streamlit). O
-esquema fixo da base está em `src/projeto_integrador/data/schema.py`, a unidade de
-tempo relativa está documentada em `docs/DATA_DICTIONARY.md` e os componentes de
-Presentation seguem os serviços de Application.
+**P-01** and **P-04** were resolved by D-10 (MLG/ULB) and D-15 (Streamlit). The base's fixed schema is in `src/credit_card_fraud/data/schema.py`, the relative time unit is documented in `docs/DATA_DICTIONARY.md`, and Presentation components follow Application's services.

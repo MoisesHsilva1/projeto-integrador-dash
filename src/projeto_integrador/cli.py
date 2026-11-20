@@ -11,6 +11,7 @@ from pathlib import Path
 
 from projeto_integrador.config import (
     CAMINHO_BRUTO,
+    CAMINHO_DESBALANCEAMENTO,
     CAMINHO_METRICAS,
     CAMINHO_MODELO,
     CAMINHO_PROCESSADO,
@@ -27,6 +28,7 @@ from projeto_integrador.data.auditoria import (
 )
 from projeto_integrador.data.loader import carregar_brutas, carregar_preparadas
 from projeto_integrador.features.dataset import construir_matriz, dividir_treino_teste
+from projeto_integrador.models.desbalanceamento import comparar_estrategias
 from projeto_integrador.models.treino import salvar_modelo, treinar_e_avaliar
 from projeto_integrador.relatorios.eda import gerar_relatorio_eda
 from projeto_integrador.relatorios.modelo import gerar_relatorio_modelo
@@ -152,6 +154,30 @@ def treinar_modelos() -> dict[str, object]:
     return metadados
 
 
+def comparar_desbalanceamento() -> dict[str, dict[str, float]]:
+    transacoes = carregar_preparadas()
+    atributos, alvo = construir_matriz(transacoes)
+    atributos_treino, _, alvo_treino, _ = dividir_treino_teste(atributos, alvo)
+
+    resultados = comparar_estrategias(
+        atributos_treino, alvo_treino, folds=NUMERO_FOLDS, semente=SEMENTE
+    )
+
+    CAMINHO_DESBALANCEAMENTO.write_text(
+        json.dumps(resultados, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+
+    print("Estratégias de desbalanceamento (validação cruzada no treino):")
+    for nome, valores in resultados.items():
+        print(
+            f"  {nome}: AUPRC={formatar_numero(valores['auprc_media'], 4)} "
+            f"± {formatar_numero(valores['auprc_desvio'], 4)} "
+            f"({formatar_numero(valores['tempo_treino_segundos'], 1)} s por ajuste)."
+        )
+    print(f"Arquivo: {CAMINHO_DESBALANCEAMENTO}")
+    return resultados
+
+
 def abrir_dashboard() -> None:
     """E8: inicia o dashboard Streamlit."""
     aplicativo = Path(__file__).parent / "presentation" / "app.py"
@@ -187,6 +213,10 @@ def main(argv: list[str] | None = None) -> None:
         "treinar", help="treinar, avaliar e salvar modelo e artefatos (E5–E7)"
     )
     subcomandos.add_parser("tudo", help="executar preparar, eda e treinar")
+    subcomandos.add_parser(
+        "desbalanceamento",
+        help="comparar estratégias de desbalanceamento no treino",
+    )
     subcomandos.add_parser("dashboard", help="abrir o dashboard Streamlit (E8)")
 
     argumentos = parser.parse_args(argv)
@@ -196,6 +226,7 @@ def main(argv: list[str] | None = None) -> None:
         "eda": gerar_eda,
         "treinar": treinar_modelos,
         "tudo": executar_tudo,
+        "desbalanceamento": comparar_desbalanceamento,
         "dashboard": abrir_dashboard,
     }
 

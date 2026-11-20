@@ -1,0 +1,48 @@
+{
+  "checksum_md5": "e90efcb83d69faf99fcab8b0255024de",
+  "audit": {
+    "rows": 284807,
+    "columns": 31,
+    "missing_values": 0,
+    "exact_duplicates": 1081,
+    "duplicate_frauds": 19,
+    "frauds": 492,
+    "legitimate": 284315,
+    "fraud_rate": 0.001727485630620034,
+    "start_seconds": 0.0,
+    "end_seconds": 172792.0,
+    "duration_hours": 47.99777777777778,
+    "total_amount": 25162590.01,
+    "median_amount": 22.0,
+    "min_amount": 0.0,
+    "max_amount": 25691.16,
+    "zero_amount_transactions": 1825,
+    "zero_amount_frauds": 27,
+    "without_duplicates": {
+      "rows": 283726,
+      "frauds": 473,
+      "legitimate": 283253,
+      "fraud_rate": 0.001667101358352777
+    }
+  },
+  "record": {
+    "original_rows": 284807,
+    "final_rows": 283726,
+    "original_frauds": 492,
+    "final_frauds": 473,
+    "final_legitimate": 283253,
+    "final_fraud_rate": 0.001667101358352777,
+    "removals": [
+      {
+        "rule": "Remoção de duplicatas exatas (mantida a primeira ocorrência)",
+        "rows_removed": 1081,
+        "frauds_removed": 19
+      }
+    ],
+    "kept": [
+      "Transações com Amount = 0 (não são valores inválidos na base).",
+      "Outliers de Amount: não removidos; fraudes podem estar nos extremos.",
+      "Atributos V1–V28: mantidos como componentes PCA anonimizados."
+    ]
+  }
+}

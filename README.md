@@ -1,123 +1,119 @@
-# projeto-integrador
+# credit-card-fraud
 
-Detecção de fraudes em transações com cartão de crédito — Projeto Integrador do
-Grupo 54 (Centro Universitário SENAC). O projeto combina análise exploratória,
-classificação supervisionada e um dashboard interativo sobre a base **MLG/ULB**
-(*Credit Card Fraud Detection*).
+Credit card fraud detection — Projeto Integrador do Grupo 54 (Centro Universitário SENAC). The project combines exploratory data analysis, supervised classification, and an interactive dashboard over the base **MLG/ULB** (*Credit Card Fraud Detection*).
 
-## Começar
+## Getting started
 
-Requisitos: Python ≥ 3.11 e [uv](https://docs.astral.sh/uv/).
+Requirements: Python ≥ 3.11 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-cd ~/Documents/projects/projeto-integrador
+cd ~/Documents/projects/credit-card-fraud
 uv venv
 uv pip install -e ".[dev]"
 code .
 ```
 
-Abra o projeto com o perfil **Python** do VS Code. O interpretador
-`.venv/bin/python` e os testes pytest já vêm configurados em
+Open the project with the **Python** profile in VS Code. The interpreter
+is `.venv/bin/python` and the pytest tests are already configured in
 `.vscode/settings.json`.
 
-Coloque a base em `data/raw/creditcard.csv` (o arquivo não é versionado). Veja
-[`data/README.md`](data/README.md) e o dicionário em
+Place the base in `data/raw/creditcard.csv` (the file is not versioned). See
+[`data/README.md`](data/README.md) and the dictionary in
 [`docs/DATA_DICTIONARY.md`](docs/DATA_DICTIONARY.md).
 
 ## Pipeline
 
-O fluxo segue as etapas do plano (`docs/PROJECT_PLAN.md`) e da aula 2:
+The flow follows the plan steps (`docs/PROJECT_PLAN.md`) and Aula 2:
 
 ```bash
-uv run projeto-integrador-pipeline preparar   # E2/E3: audita, limpa e grava o Parquet
-uv run projeto-integrador-pipeline eda        # E4: figuras e relatório da EDA
-uv run projeto-integrador-pipeline treinar    # E5–E7: modelos, avaliação e artefatos
-uv run projeto-integrador-pipeline tudo       # executa as três etapas em sequência
+uv run credit-card-fraud-pipeline prepare    # E2/E3: audit, clean, write Parquet
+uv run credit-card-fraud-pipeline eda        # E4: figures and the EDA report
+uv run credit-card-fraud-pipeline train      # E5–E7: models, evaluation, artifacts
+uv run credit-card-fraud-pipeline all        # run the three steps in sequence
 ```
 
-Cada comando é reprodutível e usa a semente `42` (`src/projeto_integrador/config.py`).
-O treino compara Regressão Logística (baseline), Random Forest e Gradient
-Boosting, seleciona pela AUPRC média em validação cruzada e avalia o holdout com
-o limite de decisão escolhido no treino.
+Each command is reproducible and uses seed `42` (`src/credit_card_fraud/config.py`).
+Training compares Logistic Regression (baseline), Random Forest and Gradient
+Boosting, selects by the mean AUPRC in cross-validation, and evaluates the
+holdout with the decision threshold chosen at training time.
 
 ## Dashboard
 
 ```bash
-uv run projeto-integrador-dashboard
-# equivalente: uv run streamlit run src/projeto_integrador/presentation/app.py
+uv run credit-card-fraud-dashboard
+# equivalent: uv run streamlit run src/credit_card_fraud/presentation/app.py
 ```
 
-O dashboard abre no navegador com as quatro visualizações obrigatórias —
-indicadores gerais, distribuição de fraudes, fraudes por faixa de valor e
-evolução temporal — além do mapa de calor, das correlações, do explorador de
-transações e dos indicadores offline do modelo. Os filtros são de valor, tempo
-decorrido e classificação (fraude/legítima). A interface é em português
-brasileiro, conforme a decisão D-26.
+The dashboard opens in the browser with the four mandatory visualizations —
+general indicators, fraud distribution, frauds by value band, and temporal
+evolution — plus the heatmap, correlations, the transaction explorer, and the
+model's offline indicators. Filters are value, elapsed time, and
+classification (fraud/legitimate). The interface is in Brazilian Portuguese
+(pt-BR), per decision D-26.
 
-> O dashboard precisa da base preparada. Se ela não existir, execute
-> `uv run projeto-integrador-pipeline preparar` antes.
+> The dashboard needs the prepared base. If it does not exist, run
+> `uv run credit-card-fraud-pipeline prepare` first.
 
-## Artefatos gerados
+## Generated artifacts
 
-| Artefato | Caminho |
+| Artifact | Path |
 |---|---|
-| Base tratada (não versionada) | `data/processed/transacoes.parquet` |
-| Relatório de qualidade | `reports/RELATORIO_QUALIDADE.md` e `reports/qualidade.json` |
-| Relatório de EDA | `reports/RELATORIO_EDA.md` e `reports/figures/eda_*.png` |
-| Métricas do modelo | `reports/model/metricas.json` |
-| Modelo treinado (não versionado) | `reports/model/modelo_final.joblib` |
-| Relatório de avaliação | `reports/RELATORIO_MODELO.md` e `reports/figures/modelo_*.png` |
+| Prepared base (not versioned) | `data/processed/transactions.parquet` |
+| Quality report | `reports/RELATORIO_QUALIDADE.md` and `reports/quality.json` |
+| EDA report | `reports/RELATORIO_EDA.md` and `reports/figures/eda_*.png` |
+| Model metrics | `reports/model/metrics.json` |
+| Trained model (not versioned) | `reports/model/model_final.joblib` |
+| Evaluation report | `reports/RELATORIO_MODELO.md` and `reports/figures/modelo_*.png` |
 
-## Testes e qualidade
+## Tests and quality
 
 ```bash
-uv run pytest              # suíte completa
+uv run pytest              # full suite
 uv run pytest tests/test_main.py::test_main
 uv run ruff check --fix .  # lint + autofix
-uv run ruff format .       # formatação
+uv run ruff format .       # formatting
 ```
 
-O teste de fumaça do dashboard é ignorado automaticamente se a base preparada
-ainda não existir.
+The dashboard smoke test is skipped automatically if the prepared base does
+not yet exist.
 
-## Estrutura
+## Structure
 
 ```text
-src/projeto_integrador/
-├── config.py            caminhos, sementes e constantes
-├── data/                Data Access: carga, validação de esquema, cache, auditoria
-├── analytics/           métricas, agregações e regras analíticas
-├── application/         filtros e serviços do dashboard
-├── features/            atributos e split treino/teste (trilha offline)
-├── models/              treino, limite, avaliação e persistência (trilha offline)
-├── presentation/        dashboard Streamlit e componentes de gráfico
-├── relatorios/          geração dos relatórios e figuras
-└── cli.py               linha de comando do pipeline
-tests/                   testes pytest
-data/                    bases de dados (não versionadas)
-docs/                    plano, arquitetura, dicionário e decisões
-reports/                 figuras, métricas e relatórios gerados
+src/credit_card_fraud/
+├── config.py              paths, seeds, and constants
+├── data/                  Data Access: loading, schema validation, cache, audit
+├── analytics/             metrics, aggregations, and analytical rules
+├── application/           dashboard filters and services
+├── features/              attributes and train/test split (offline track)
+├── models/                training, threshold, evaluation, persistence (offline track)
+├── presentation/          Streamlit dashboard and chart components
+├── reports/               report and figure generation
+└── cli.py                 pipeline command line
+tests/                     pytest suite
+data/                      bases (not versioned)
+docs/                      plan, architecture, dictionary, decisions
+reports/                   figures, metrics, and generated reports
 ```
 
-As regras de dependência entre camadas estão em
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). Documentação e código ficam em
-português; a interface do dashboard fica em inglês.
+The layer dependency rules are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+Documentation, identifiers, and code comments are in English; the dashboard
+interface is in Brazilian Portuguese (pt-BR), per decision D-26.
 
-## Limitações da base
+## Base limitations
 
-- Dois dias de transações europeias (setembro de 2013), com tempo relativo.
-- Atributos `V1`–`V28` anonimizados por PCA: não é possível nomear fatores de
-  negócio.
-- Moeda não fixada no dicionário; os valores são exibidos na unidade original.
-- Desbalanceamento extremo: 473 fraudes em 283.726 transações após remover as
-  duplicatas exatas.
-- O projeto é uma ferramenta acadêmica de apoio à decisão, não um sistema
-  antifraude de produção com bloqueio automático.
+- Two days of European card transactions (September 2013), with relative time.
+- `V1`–`V28` anonymized by PCA: business factors cannot be named.
+- Currency not fixed in the dictionary; values are shown in the original unit.
+- Extreme imbalance: 473 frauds out of 283,726 transactions after removing
+  exact duplicates.
+- The project is an academic decision-support tool, not a production fraud
+  prevention system with automatic blocking.
 
-## Documentação
+## Documentation
 
-- [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md) — plano completo, requisitos e pendências.
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — fluxo em camadas.
-- [`docs/DATA_DICTIONARY.md`](docs/DATA_DICTIONARY.md) — proveniência, colunas e tratamento.
-- [`docs/DECISIONS.md`](docs/DECISIONS.md) — decisões tomadas na implementação.
-- [`AGENTS.md`](AGENTS.md) — contexto operacional resumido.
+- [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md) — full plan, requirements, and open items.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — layered flow.
+- [`docs/DATA_DICTIONARY.md`](docs/DATA_DICTIONARY.md) — provenance, columns, treatment.
+- [`docs/DECISIONS.md`](docs/DECISIONS.md) — decisions made during implementation.
+- [`AGENTS.md`](AGENTS.md) — summarized operational context.

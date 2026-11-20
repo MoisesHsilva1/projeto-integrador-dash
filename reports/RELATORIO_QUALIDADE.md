@@ -44,7 +44,7 @@
 - Outliers de Amount: não removidos; fraudes podem estar nos extremos.
 - Atributos V1–V28: mantidos como componentes PCA anonimizados.
 
-A base tratada é gravada em `data/processed/transacoes.parquet` e não substitui o
+A base tratada é gravada em `data/processed/transactions.parquet` e não substitui o
 arquivo bruto em `data/raw/`.
 
 ## 4. Limitações

@@ -2,7 +2,7 @@
 
 **Base:** MLG/ULB — *Credit Card Fraud Detection*
 
-**Arquivo preparado:** `data/processed/transacoes.parquet`
+**Arquivo preparado:** `data/processed/transactions.parquet`
 
 **Recorte:** 283.726 transações,
 sendo 473 fraudes
@@ -32,7 +32,7 @@ sendo 473 fraudes
 | Legítima | 283.253 | 99,83% |
 | Fraude | 473 | 0,17% |
 
-![Distribuição das classes](figures/eda_01_distribuicao_classes.png)
+![Distribuição das classes](figures/eda_01_class_distribution.png)
 
 ## 2. OE-1 — Padrões e características das fraudes
 
@@ -56,9 +56,9 @@ sendo 473 fraudes
 | V7 | -0,172 |
 | V11 | 0,149 |
 
-![Valor por classe](figures/eda_02_valor_por_classe.png)
+![Valor por classe](figures/eda_02_value_by_class.png)
 
-![Correlações](figures/eda_06_correlacao_alvo.png)
+![Correlações](figures/eda_06_correlation_target.png)
 
 **Leitura:** os atributos são componentes PCA anonimizados. A correlação indica
 associação estatística na base, não um fator de negócio nomeável (R-06).
@@ -78,7 +78,7 @@ associação estatística na base, não um fator de negócio nomeável (R-06).
 - 84,99% das fraudes têm valor até 250.
 - 73,57% das fraudes têm valor até 100.
 
-![Fraudes por faixa de valor](figures/eda_03_fraudes_por_faixa_valor.png)
+![Fraudes por faixa de valor](figures/eda_03_frauds_by_value_band.png)
 
 ## 4. OE-3 — Fraudes ao longo do tempo
 
@@ -91,9 +91,9 @@ A base cobre 48 blocos de
 | 1 | 272 |
 | 2 | 201 |
 
-![Evolução temporal](figures/eda_04_evolucao_temporal.png)
+![Evolução temporal](figures/eda_04_temporal_evolution.png)
 
-![Mapa de calor](figures/eda_05_calor_temporal.png)
+![Mapa de calor](figures/eda_05_temporal_heatmap.png)
 
 ## 5. Achados para a modelagem
 
