@@ -1,7 +1,7 @@
 [project]
-name = "projeto-integrador"
+name = "credit-card-fraud"
 version = "0.1.0"
-description = "Projeto integrador"
+description = "Credit card fraud detection project"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -22,9 +22,9 @@ dev = [
 ]
 
 [project.scripts]
-projeto-integrador = "projeto_integrador.main:main"
-projeto-integrador-pipeline = "projeto_integrador.cli:main"
-projeto-integrador-dashboard = "projeto_integrador.cli:abrir_dashboard"
+credit-card-fraud = "credit_card_fraud.main:main"
+credit-card-fraud-pipeline = "credit_card_fraud.cli:main"
+credit-card-fraud-dashboard = "credit_card_fraud.cli:open_dashboard"
 
 [build-system]
 requires = ["setuptools>=68"]

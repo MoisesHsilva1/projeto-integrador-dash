@@ -1,43 +1,43 @@
-"""Testes da validação de esquema."""
+"""Schema validation tests."""
 
 from __future__ import annotations
 
 import pandas as pd
 import pytest
 
-from projeto_integrador.data.schema import ErroDeEsquema, validar_esquema
+from credit_card_fraud.data.schema import SchemaError, validate_schema
 
 
-def test_esquema_valido(transacoes_sinteticas: pd.DataFrame) -> None:
-    validar_esquema(transacoes_sinteticas)
+def test_valid_schema(synthetic_transactions: pd.DataFrame) -> None:
+    validate_schema(synthetic_transactions)
 
 
-def test_coluna_ausente(transacoes_sinteticas: pd.DataFrame) -> None:
-    with pytest.raises(ErroDeEsquema, match="ausentes"):
-        validar_esquema(transacoes_sinteticas.drop(columns=["V5"]))
+def test_missing_column(synthetic_transactions: pd.DataFrame) -> None:
+    with pytest.raises(SchemaError, match="Missing"):
+        validate_schema(synthetic_transactions.drop(columns=["V5"]))
 
 
-def test_coluna_nao_numerica(transacoes_sinteticas: pd.DataFrame) -> None:
-    invalida = transacoes_sinteticas.copy()
-    invalida["V3"] = "texto"
-    with pytest.raises(ErroDeEsquema, match="numéricas"):
-        validar_esquema(invalida)
+def test_non_numeric_column(synthetic_transactions: pd.DataFrame) -> None:
+    invalid = synthetic_transactions.copy()
+    invalid["V3"] = "text"
+    with pytest.raises(SchemaError, match="numeric"):
+        validate_schema(invalid)
 
 
-def test_classe_invalida(transacoes_sinteticas: pd.DataFrame) -> None:
-    invalida = transacoes_sinteticas.copy()
-    invalida.loc[0, "Class"] = 2
-    with pytest.raises(ErroDeEsquema, match="Class"):
-        validar_esquema(invalida)
+def test_invalid_class(synthetic_transactions: pd.DataFrame) -> None:
+    invalid = synthetic_transactions.copy()
+    invalid.loc[0, "Class"] = 2
+    with pytest.raises(SchemaError, match="Class"):
+        validate_schema(invalid)
 
 
-def test_valor_negativo(transacoes_sinteticas: pd.DataFrame) -> None:
-    invalida = transacoes_sinteticas.copy()
-    invalida.loc[0, "Amount"] = -1.0
-    with pytest.raises(ErroDeEsquema, match="Amount"):
-        validar_esquema(invalida)
+def test_negative_amount(synthetic_transactions: pd.DataFrame) -> None:
+    invalid = synthetic_transactions.copy()
+    invalid.loc[0, "Amount"] = -1.0
+    with pytest.raises(SchemaError, match="Amount"):
+        validate_schema(invalid)
 
 
-def test_base_vazia(transacoes_sinteticas: pd.DataFrame) -> None:
-    with pytest.raises(ErroDeEsquema, match="vazia"):
-        validar_esquema(transacoes_sinteticas.iloc[0:0])
+def test_empty_base(synthetic_transactions: pd.DataFrame) -> None:
+    with pytest.raises(SchemaError, match="empty"):
+        validate_schema(synthetic_transactions.iloc[0:0])

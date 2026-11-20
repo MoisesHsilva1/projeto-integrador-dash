@@ -1,0 +1,22 @@
+{
+  "Class weights (current)": {
+    "auprc_mean": 0.8012215409031832,
+    "auprc_std": 0.025653280068732326,
+    "train_time_seconds": 22.884807419000328
+  },
+  "No class weights": {
+    "auprc_mean": 0.8012215409031832,
+    "auprc_std": 0.025653280068732326,
+    "train_time_seconds": 28.59336858466607
+  },
+  "Random undersampling": {
+    "auprc_mean": 0.6889545161928251,
+    "auprc_std": 0.023853901934440026,
+    "train_time_seconds": 1.5304933309998887
+  },
+  "Random oversampling": {
+    "auprc_mean": 0.8230348917667607,
+    "auprc_std": 0.0239519423371224,
+    "train_time_seconds": 86.3329780523339
+  }
+}
