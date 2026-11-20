@@ -2,11 +2,34 @@
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.exceptions import UndefinedMetricWarning
 
 from credit_card_fraud.config import PCA_COLUMNS
+
+
+@pytest.fixture(autouse=True)
+def suppress_known_third_party_warnings() -> None:  # type: ignore[return]
+    """Suppress known deprecation warnings emitted by third-party libs.
+
+    - ``UndefinedMetricWarning``: expected when tiny synthetic datasets produce
+      no positive predictions in some folds.
+    - ``MatplotlibDeprecationWarning``: seaborn's internal ``bxp(vert=...)``
+      call, suppressed until seaborn completes its own migration. Our code
+      already passes ``orient="v"`` explicitly.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UndefinedMetricWarning)
+        warnings.filterwarnings(
+            "ignore",
+            message="vert: bool was deprecated",
+            category=DeprecationWarning,
+        )
+        yield
 
 
 @pytest.fixture
