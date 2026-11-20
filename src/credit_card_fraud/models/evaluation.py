@@ -84,6 +84,24 @@ def _row_type_label(row_type: str, threshold: float, chosen_threshold: float) ->
     return row_type
 
 
+def find_best_f1_threshold(
+    precision: np.ndarray, recall: np.ndarray, thresholds: np.ndarray
+) -> tuple[float, float]:
+    """Find threshold and F1 score maximizing F1 along the precision-recall curve."""
+    if len(thresholds) == 0:
+        return float(DEFAULT_THRESHOLD), 0.0
+    f1_curve = np.divide(
+        2 * precision[:-1] * recall[:-1],
+        precision[:-1] + recall[:-1],
+        out=np.zeros_like(precision[:-1]),
+        where=(precision[:-1] + recall[:-1]) > 0,
+    )
+    if not f1_curve.size:
+        return float(DEFAULT_THRESHOLD), 0.0
+    position = int(np.argmax(f1_curve))
+    return float(thresholds[position]), float(f1_curve[position])
+
+
 def threshold_table(
     y_true: pd.Series | np.ndarray,
     probabilities: np.ndarray,
@@ -119,15 +137,8 @@ def threshold_table(
     add("default_0.5", DEFAULT_THRESHOLD)
     add("chosen", chosen_threshold)
 
-    # Threshold with the highest F1 on the curve, to contextualize the choice.
-    f1_curve = np.divide(
-        2 * precision[:-1] * recall[:-1],
-        precision[:-1] + recall[:-1],
-        out=np.zeros_like(precision[:-1]),
-        where=(precision[:-1] + recall[:-1]) > 0,
-    )
-    if len(thresholds) and f1_curve.size:
-        add("max_f1", thresholds[int(np.argmax(f1_curve))])
+    best_threshold, _ = find_best_f1_threshold(precision, recall, thresholds)
+    add("max_f1", best_threshold)
 
     for target in target_recalls:
         candidates = [
@@ -246,7 +257,7 @@ def permutation_importance(
         model,
         features,
         target,
-        n_repetitions=n_repeats,
+        n_repeats=n_repeats,
         random_state=seed,
         scoring="average_precision",
         n_jobs=-1,

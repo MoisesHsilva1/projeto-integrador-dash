@@ -13,6 +13,8 @@ from credit_card_fraud.application import (
     TransactionStatus,
     create_service,
 )
+from credit_card_fraud.data.schema import SchemaError
+from credit_card_fraud.deployment.bootstrap import ensure_prepared_data
 from credit_card_fraud.formatting import (
     format_amount,
     format_integer,
@@ -35,14 +37,6 @@ TABLE_LABELS = {
 }
 
 EXPLORER_COLUMNS = ["Time", "Amount", "Class", *[f"V{i}" for i in range(1, 29)]]
-
-
-def _format_integer(value: float | int) -> str:
-    return format_integer(value)
-
-
-def _format_amount(value: float) -> str:
-    return format_amount(value)
 
 
 def _build_filters(service: DashboardService) -> DashboardFilters:
@@ -224,9 +218,11 @@ def main() -> None:
     st.title("Análise de Fraudes em Cartão de Crédito")
 
     try:
+        with st.spinner("Preparando base de dados..."):
+            ensure_prepared_data()
         service = create_service()
-    except FileNotFoundError as error:
-        st.error(str(error))
+    except (FileNotFoundError, SchemaError, ValueError) as error:
+        st.error(f"Erro ao carregar os dados: {error}")
         st.stop()
 
     filters = _build_filters(service)
@@ -239,24 +235,24 @@ def main() -> None:
         st.caption("Filtros ativos: " + " · ".join(active))
 
     columns = st.columns(3)
-    columns[0].metric("Transações", _format_integer(summary["total_transactions"]))
+    columns[0].metric("Transações", format_integer(summary["total_transactions"]))
     columns[1].metric(
-        "Transações legítimas", _format_integer(summary["total_legitimate"])
+        "Transações legítimas", format_integer(summary["total_legitimate"])
     )
     columns[2].metric(
-        "Transações fraudulentas", _format_integer(summary["total_frauds"])
+        "Transações fraudulentas", format_integer(summary["total_frauds"])
     )
 
     columns = st.columns(3)
     columns[0].metric("Taxa de fraude", format_percentage(summary["fraud_rate"]))
     columns[1].metric(
         "Valor total movimentado",
-        _format_amount(summary["total_amount"]),
+        format_amount(summary["total_amount"]),
         help="Unidade original da base; nenhuma conversão aplicada.",
     )
     columns[2].metric(
         "Valor em fraudes",
-        _format_amount(summary["fraud_amount"]),
+        format_amount(summary["fraud_amount"]),
         help="Unidade original da base; nenhuma conversão aplicada.",
     )
 
@@ -370,7 +366,6 @@ def main() -> None:
     with tab_model:
         st.subheader("Desempenho do modelo (offline)")
         _render_model_metrics(service)
-
 
 
 if __name__ == "__main__":

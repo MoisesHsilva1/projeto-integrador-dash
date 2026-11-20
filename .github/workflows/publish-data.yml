@@ -1,0 +1,68 @@
+name: Publish dashboard data
+
+# Reproducible pipeline for the data consumed by the hosted dashboard.
+# The raw base is a GitHub Release asset; this workflow runs the preparation
+# step and publishes the resulting Parquet back to the same release.
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "GitHub Release that holds the data assets"
+        required: true
+        default: "data-v1"
+      raw_asset:
+        description: "Name of the raw CSV asset inside the release"
+        required: true
+        default: "creditcard.csv"
+
+permissions:
+  contents: write
+
+jobs:
+  prepare-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python 3.12
+        run: uv python install 3.12
+
+      - name: Download the raw base from the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RAW_ASSET: ${{ inputs.raw_asset }}
+        run: |
+          mkdir -p data/raw data/processed
+          gh release download "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern "$RAW_ASSET" \
+            --dir data/raw \
+            --clobber
+          test -s "data/raw/$RAW_ASSET"
+          if [ "$RAW_ASSET" != "creditcard.csv" ]; then
+            mv "data/raw/$RAW_ASSET" data/raw/creditcard.csv
+          fi
+
+      - name: Prepare the Parquet base (E2/E3)
+        run: uv run --python 3.12 credit-card-fraud-pipeline prepare
+
+      - name: Validate the output
+        run: test -s data/processed/transactions.parquet
+
+      - name: Publish the prepared base to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          gh release upload "$RELEASE_TAG" \
+            data/processed/transactions.parquet \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber

@@ -16,7 +16,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 from credit_card_fraud.config import N_FOLDS, SEED
-from credit_card_fraud.models.evaluation import classification_metrics
+from credit_card_fraud.models.evaluation import (
+    classification_metrics,
+    find_best_f1_threshold,
+)
 from credit_card_fraud.models.persistence import (  # noqa: F401
     load_model,
     save_model,
@@ -98,10 +101,15 @@ def compare_models(
     *,
     folds: int = N_FOLDS,
     seed: int = SEED,
-) -> dict[str, dict[str, float]]:
+    return_probabilities: bool = False,
+) -> (
+    dict[str, dict[str, float]]
+    | tuple[dict[str, dict[str, float]], dict[str, np.ndarray]]
+):
     """Compare models by stratified cross-validation on training data."""
     validation = StratifiedKFold(n_splits=folds, shuffle=True, random_state=seed)
     results: dict[str, dict[str, float]] = {}
+    probabilities_by_model: dict[str, np.ndarray] = {}
 
     for name, model in create_models(seed).items():
         scores = cross_validate(
@@ -110,6 +118,7 @@ def compare_models(
             target,
             cv=validation,
             scoring=VALIDATION_METRICS,
+            return_estimator=return_probabilities,
             n_jobs=1,
         )
         result: dict[str, float] = {}
@@ -120,6 +129,18 @@ def compare_models(
         result["train_time_seconds"] = float(np.mean(scores["fit_time"]))
         results[name] = result
 
+        if return_probabilities:
+            probabilities = np.empty(len(target), dtype="float64")
+            for estimator, (_, val_idx) in zip(
+                scores["estimator"], validation.split(features, target), strict=True
+            ):
+                probabilities[val_idx] = estimator.predict_proba(
+                    features.iloc[val_idx]
+                )[:, 1]
+            probabilities_by_model[name] = probabilities
+
+    if return_probabilities:
+        return results, probabilities_by_model
     return results
 
 
@@ -159,14 +180,7 @@ def choose_threshold(
     the holdout, to avoid contaminating the final evaluation.
     """
     precision, recall, thresholds = precision_recall_curve(y_true, probabilities)
-    f1 = np.divide(
-        2 * precision[:-1] * recall[:-1],
-        precision[:-1] + recall[:-1],
-        out=np.zeros_like(precision[:-1]),
-        where=(precision[:-1] + recall[:-1]) > 0,
-    )
-    position = int(np.argmax(f1))
-    return float(thresholds[position]), float(f1[position])
+    return find_best_f1_threshold(precision, recall, thresholds)
 
 
 def train_and_evaluate(
@@ -179,13 +193,13 @@ def train_and_evaluate(
     seed: int = SEED,
 ) -> dict[str, object]:
     """Compare models, choose the best, set the threshold, and evaluate on holdout."""
-    results = compare_models(features_train, target_train, folds=folds, seed=seed)
+    results, out_of_fold_preds = compare_models(
+        features_train, target_train, folds=folds, seed=seed, return_probabilities=True
+    )
     best_name = choose_best_model(results)
     best_model = create_models(seed)[best_name]
 
-    train_probabilities = out_of_fold_probabilities(
-        best_model, features_train, target_train, folds=folds, seed=seed
-    )
+    train_probabilities = out_of_fold_preds[best_name]
     threshold, train_f1 = choose_threshold(target_train, train_probabilities)
 
     best_model.fit(features_train, target_train)
@@ -195,13 +209,7 @@ def train_and_evaluate(
     # Baseline evaluated on the same holdout, with the threshold chosen on training.
     baseline_name = "Logistic Regression (baseline)"
     baseline_model = create_models(seed)[baseline_name]
-    baseline_train_probabilities = out_of_fold_probabilities(
-        baseline_model,
-        features_train,
-        target_train,
-        folds=folds,
-        seed=seed,
-    )
+    baseline_train_probabilities = out_of_fold_preds[baseline_name]
     baseline_threshold, baseline_f1 = choose_threshold(
         target_train, baseline_train_probabilities
     )

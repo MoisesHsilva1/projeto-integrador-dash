@@ -20,11 +20,9 @@ from credit_card_fraud.data.loader import (
     load_errors,
     load_importances,
     load_metrics,
-    load_model_artifact,
     load_prepared,
 )
 from credit_card_fraud.data.schema import validate_schema
-from credit_card_fraud.models.prediction import predict
 
 
 class DashboardService:
@@ -41,6 +39,13 @@ class DashboardService:
     @property
     def limits(self) -> dict[str, float]:
         """Limits available for the filters, in original units and hours."""
+        if self._transactions.empty:
+            return {
+                "min_amount": 0.0,
+                "max_amount": 0.0,
+                "min_hour": 0.0,
+                "max_hour": 0.0,
+            }
         hours = self._transactions[TIME_COLUMN] / SECONDS_PER_HOUR
         return {
             "min_amount": float(self._transactions[AMOUNT_COLUMN].min()),
@@ -111,16 +116,6 @@ class DashboardService:
     def model_errors(self) -> dict | None:
         """False positives and false negatives summary, when available."""
         return load_errors()
-
-    def predict(self, attributes: pd.DataFrame) -> dict[str, object]:
-        """Predict one or more records with the saved artifact, without training."""
-        artifact = load_model_artifact()
-        if artifact is None:
-            raise FileNotFoundError(
-                "Model artifact not found. Run "
-                "`uv run credit-card-fraud-pipeline train` before predicting."
-            )
-        return predict(artifact["model"], artifact["metadata"], attributes)
 
 
 def create_service(path: Path | str | None = None) -> DashboardService:

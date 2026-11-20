@@ -11,7 +11,6 @@ import pandas as pd
 
 from credit_card_fraud.config import (
     ERRORS_PATH,
-    EXPERIMENTS_PATH,
     IMPORTANCES_PATH,
     MODEL_PATH,
     PROCESSED_PATH,
@@ -109,8 +108,3 @@ def load_importances(path: Path | str | None = None) -> dict | None:
 def load_errors(path: Path | str | None = None) -> dict | None:
     """Load the holdout error summary, when available."""
     return _load_json_if_exists(path, ERRORS_PATH)
-
-
-def load_experiments(path: Path | str | None = None) -> dict | None:
-    """Load the robustness experiments, when available."""
-    return _load_json_if_exists(path, EXPERIMENTS_PATH)

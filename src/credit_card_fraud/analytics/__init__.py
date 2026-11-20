@@ -1,7 +1,6 @@
 """Analytics/Domain: metrics, aggregations, and analytical rules."""
 
 from credit_card_fraud.analytics.correlation import (
-    correlation_matrix,
     correlation_with_target,
 )
 from credit_card_fraud.analytics.summary import class_distribution, general_summary
@@ -16,7 +15,6 @@ __all__ = [
     "add_value_band",
     "add_relative_time",
     "class_distribution",
-    "correlation_matrix",
     "correlation_with_target",
     "frauds_by_value_band",
     "general_summary",

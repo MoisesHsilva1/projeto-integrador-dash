@@ -25,11 +25,3 @@ def correlation_with_target(
     correlations = correlations.dropna()
     correlations.name = "correlation"
     return correlations.reindex(correlations.abs().sort_values(ascending=False).index)
-
-
-def correlation_matrix(
-    transactions: pd.DataFrame, columns: list[str] | None = None
-) -> pd.DataFrame:
-    """Correlation matrix for a set of attributes."""
-    selected = columns or [*PCA_COLUMNS, AMOUNT_COLUMN, TIME_COLUMN]
-    return transactions[selected].corr()

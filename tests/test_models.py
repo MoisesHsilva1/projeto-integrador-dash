@@ -10,10 +10,14 @@ import pandas as pd
 from credit_card_fraud.features.dataset import build_matrix, split_train_test
 from credit_card_fraud.models.evaluation import (
     classification_metrics,
+    error_summary,
     feature_importances,
+    permutation_importance,
+    value_impact,
 )
 from credit_card_fraud.models.training import (
     choose_threshold,
+    compare_models,
     create_models,
     load_model,
     save_model,
@@ -81,3 +85,55 @@ def test_save_and_load_model(
     assert loaded["metadata"]["decision_threshold"] == 0.5
     probabilities = loaded["model"].predict_proba(features)[:, 1]
     assert probabilities.shape == (len(features),)
+
+
+def test_value_impact_calculation() -> None:
+    y_true = np.array([0, 0, 1, 1])
+    probabilities = np.array([0.1, 0.9, 0.2, 0.8])
+    amounts = np.array([10.0, 50.0, 100.0, 200.0])
+    impact = value_impact(y_true, probabilities, amounts, threshold=0.5)
+
+    assert impact["total_amount"] == 360.0
+    assert impact["fraud_amount"] == 300.0
+    assert impact["false_positive_amount"] == 50.0
+    assert impact["false_negative_amount"] == 100.0
+    assert impact["false_positives"] == 1
+    assert impact["false_negatives"] == 1
+
+
+def test_error_summary() -> None:
+    y_true = np.array([0, 0, 1, 1])
+    probabilities = np.array([0.1, 0.9, 0.2, 0.8])
+    amounts = np.array([10.0, 50.0, 100.0, 200.0])
+    summary = error_summary(y_true, probabilities, amounts, threshold=0.5)
+
+    assert summary["false_positives"] == 1
+    assert summary["false_negatives"] == 1
+    assert len(summary["largest_false_positives"]) == 1
+    assert len(summary["largest_false_negatives"]) == 1
+
+
+def test_permutation_importance(synthetic_transactions: pd.DataFrame) -> None:
+    features, target = build_matrix(synthetic_transactions)
+    model = create_models()["Logistic Regression (baseline)"]
+    model.fit(features, target)
+
+    importances = permutation_importance(
+        model, features, target, n_repeats=2, sample=100, seed=42
+    )
+    assert not importances.empty
+    assert "mean" in importances.columns
+    assert "std" in importances.columns
+
+
+def test_compare_models_return_probabilities(
+    synthetic_transactions: pd.DataFrame,
+) -> None:
+    features, target = build_matrix(synthetic_transactions)
+    results, probs = compare_models(
+        features, target, folds=2, return_probabilities=True
+    )
+    assert len(results) == len(create_models())
+    assert set(probs.keys()) == set(create_models())
+    for p in probs.values():
+        assert len(p) == len(target)

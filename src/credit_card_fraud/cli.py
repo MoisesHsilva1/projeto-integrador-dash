@@ -38,11 +38,12 @@ from credit_card_fraud.data.loader import (
     load_prepared,
     load_raw,
 )
+from credit_card_fraud.data.schema import SchemaError
 from credit_card_fraud.features.dataset import build_matrix, split_train_test
 from credit_card_fraud.models.evaluation import (
     confidence_intervals,
     error_summary,
-    feature_importances,
+    permutation_importance,
     threshold_table,
     value_impact,
 )
@@ -288,7 +289,7 @@ def run_experiments() -> dict[str, object]:
     test_probabilities = model.predict_proba(features_test)[:, 1]
     test_amounts = features_test[AMOUNT_COLUMN].to_numpy()
 
-    importances = feature_importances(
+    importances = permutation_importance(
         model,
         features_test,
         target_test,
@@ -473,7 +474,7 @@ def main(argv: list[str] | None = None) -> None:
 
     try:
         commands[args.command]()
-    except FileNotFoundError as error:
+    except (FileNotFoundError, SchemaError, ValueError) as error:
         raise SystemExit(f"Error: {error}") from error
 
 
