@@ -1,9 +1,5 @@
 name: Publish dashboard data
 
-# Reproducible pipeline for the data consumed by the hosted dashboard.
-# The raw base is a GitHub Release asset; this workflow runs the preparation
-# step and publishes the resulting Parquet back to the same release.
-
 on:
   workflow_dispatch:
     inputs:

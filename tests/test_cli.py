@@ -37,7 +37,6 @@ def test_cli_handles_missing_file_error(monkeypatch: pytest.MonkeyPatch) -> None
 def test_check_prerequisites_missing_raw(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Raises FileNotFoundError with actionable message when raw file is absent."""
     monkeypatch.setattr(cli_module, "RAW_PATH", tmp_path / "creditcard.csv")
     with pytest.raises(FileNotFoundError, match="Place 'creditcard.csv'"):
         _check_prerequisites("prepare")
@@ -46,7 +45,6 @@ def test_check_prerequisites_missing_raw(
 def test_check_prerequisites_missing_processed(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Raises FileNotFoundError with actionable message when prepared base is absent."""
     raw = tmp_path / "creditcard.csv"
     raw.touch()
     monkeypatch.setattr(cli_module, "RAW_PATH", raw)

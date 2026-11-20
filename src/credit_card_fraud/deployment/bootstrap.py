@@ -1,10 +1,3 @@
-"""Provision the prepared base at runtime for hosted deployments.
-
-The prepared Parquet file is intentionally not versioned. On Streamlit
-Community Cloud the repository is cloned without it, so the app downloads it
-from a GitHub Release asset on the first run. Local runs are unaffected: an
-existing file is never replaced.
-"""
 
 from __future__ import annotations
 
@@ -22,7 +15,6 @@ CHUNK_SIZE = 1024 * 1024
 
 
 def setting(name: str) -> str | None:
-    """Read a deployment setting from the environment or Streamlit secrets."""
     value = os.environ.get(name)
     if value:
         return value
@@ -31,12 +23,11 @@ def setting(name: str) -> str | None:
 
         secret = st.secrets.get(name)
         return str(secret) if secret else None
-    except Exception:  # secrets are optional outside a Streamlit runtime
+    except Exception:
         return None
 
 
 def download_url() -> str:
-    """Build the URL of the release asset that holds the prepared base."""
     explicit = setting("DATA_DOWNLOAD_URL")
     if explicit:
         return explicit
@@ -79,7 +70,6 @@ def download_prepared(url: str, destination: Path) -> None:
 
 
 def ensure_prepared_data(path: Path | None = None) -> Path:
-    """Return the local prepared base, downloading it from a release if absent."""
     destination = Path(path) if path is not None else PROCESSED_PATH
     if destination.exists():
         return destination
