@@ -218,15 +218,10 @@ def main() -> None:
     """Render the main dashboard page."""
     st.set_page_config(
         page_title="Análise de Fraudes em Cartão de Crédito",
-        page_icon="💳",
         layout="wide",
     )
 
     st.title("Análise de Fraudes em Cartão de Crédito")
-    st.caption(
-        "Base MLG/ULB · dois dias de transações europeias · tempo relativo · "
-        "atributos anonimizados por PCA · protótipo acadêmico de apoio à decisão"
-    )
 
     try:
         service = create_service()
@@ -376,12 +371,6 @@ def main() -> None:
         st.subheader("Desempenho do modelo (offline)")
         _render_model_metrics(service)
 
-    st.divider()
-    st.caption(
-        "Valores na unidade original da base; nenhuma conversão de moeda foi "
-        "aplicada. Rótulos históricos; o dashboard é ferramenta de apoio à "
-        "decisão, não sistema automatizado de bloqueio."
-    )
 
 
 if __name__ == "__main__":
