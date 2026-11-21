@@ -146,31 +146,47 @@ def _render_model_metrics(service: DashboardService) -> None:
     metrics = service.model_metrics()
     if not metrics:
         st.info(
-            "Model metrics unavailable. Run "
-            "`uv run credit-card-fraud-pipeline train` to generate them."
+            "Métricas do modelo indisponíveis. Execute "
+            "`uv run credit-card-fraud-pipeline train` para gerá-las."
         )
         return
 
     holdout = metrics.get("holdout_metrics", {})
+    cross_validation = metrics.get("cross_validation", {})
+    selected_model = str(metrics.get("selected_model", "—"))
+    candidates = list(cross_validation)
+    folds = int(metrics.get("folds", 3))
+    seed = int(metrics.get("seed", 42))
+    test_proportion = float(metrics.get("test_proportion", 0.2))
+
+    st.markdown(f"**Modelo utilizado na análise:** {selected_model}")
+    if candidates:
+        st.caption(
+            "Escolhido por ter o maior AUPRC médio na validação cruzada "
+            f"({folds} dobras, seed {seed}) entre os candidatos: "
+            f"{', '.join(candidates)}. O AUPRC é a métrica principal por causa "
+            "do forte desbalanceamento; a acurácia não é usada para selecionar "
+            "o modelo."
+        )
+
     st.caption(
-        "Holdout results (20% of the data), seed 42. Static: not affected by "
-        "sidebar filters."
+        f"Resultados no holdout ({test_proportion:.0%} da base), seed {seed}. "
+        "Estáticos: não são afetados pelos filtros da barra lateral."
     )
     columns = st.columns(4)
-    columns[0].metric("Modelo", str(metrics.get("model_selected", "—")))
-    columns[1].metric("AUPRC", format_amount(float(holdout.get("auprc", 0.0)), 4))
-    columns[2].metric("ROC-AUC", format_amount(float(holdout.get("roc_auc", 0.0)), 4))
-    columns[3].metric("F1", format_amount(float(holdout.get("f1", 0.0)), 4))
-
-    columns = st.columns(4)
-    columns[0].metric(
+    columns[0].metric("AUPRC", format_amount(float(holdout.get("auprc", 0.0)), 4))
+    columns[1].metric("ROC-AUC", format_amount(float(holdout.get("roc_auc", 0.0)), 4))
+    columns[2].metric(
         "Precisão", format_amount(float(holdout.get("precision", 0.0)), 4)
     )
-    columns[1].metric("Recall", format_amount(float(holdout.get("recall", 0.0)), 4))
-    columns[2].metric(
+    columns[3].metric("Recall", format_amount(float(holdout.get("recall", 0.0)), 4))
+
+    columns = st.columns(3)
+    columns[0].metric("F1", format_amount(float(holdout.get("f1", 0.0)), 4))
+    columns[1].metric(
         "Limite de decisão", format_amount(float(holdout.get("threshold", 0.0)), 4)
     )
-    columns[3].metric("Acurácia", format_amount(float(holdout.get("accuracy", 0.0)), 4))
+    columns[2].metric("Acurácia", format_amount(float(holdout.get("accuracy", 0.0)), 4))
 
     st.markdown("**Matriz de confusão (holdout)**")
     confusion = pd.DataFrame(
@@ -188,8 +204,7 @@ def _render_model_metrics(service: DashboardService) -> None:
     )
     st.dataframe(confusion, hide_index=True, use_container_width=True)
 
-    st.markdown("**Validação cruzada (3 dobras)**")
-    cross_validation = metrics.get("cross_validation", {})
+    st.markdown(f"**Validação cruzada ({folds} dobras)**")
     if cross_validation:
         rows = []
         for name, values in cross_validation.items():
@@ -276,15 +291,15 @@ def main() -> None:
     )
 
     with tab_overview:
-        col_left, col_right = st.columns([1, 1.5])
-        with col_left:
+        row1_left, row1_right = st.columns(2)
+        with row1_left:
             st.subheader("Distribuição de fraudes")
             st.plotly_chart(
                 components.distribution_chart(view["distribution"]),
                 use_container_width=True,
                 key="distribution_chart",
             )
-        with col_right:
+        with row1_right:
             st.subheader("Fraudes por faixa de valor")
             st.plotly_chart(
                 components.value_band_chart(view["bands"]),
@@ -292,19 +307,32 @@ def main() -> None:
                 key="value_band_chart_overview",
             )
 
-        st.subheader("Evolução temporal")
-        granularity = st.selectbox(
-            "Granularidade (horas)",
-            [1, 2, 4, 6, 12, 24],
-            index=0,
-            key="temporal_granularity",
-        )
-        series = service.evolution_over_time(filters, hour_granularity=granularity)
-        st.plotly_chart(
-            components.temporal_chart(series),
-            use_container_width=True,
-            key="temporal_chart",
-        )
+        row2_left, row2_right = st.columns(2)
+        with row2_left:
+            st.subheader("Evolução temporal")
+            granularity = st.selectbox(
+                "Granularidade (horas)",
+                [1, 2, 4, 6, 12, 24],
+                index=0,
+                key="temporal_granularity",
+            )
+            series = service.evolution_over_time(filters, hour_granularity=granularity)
+            st.plotly_chart(
+                components.temporal_chart(series),
+                use_container_width=True,
+                key="temporal_chart",
+            )
+        with row2_right:
+            st.subheader("Mapa de calor de fraudes")
+            st.plotly_chart(
+                components.heatmap_chart(view["heatmap"]),
+                use_container_width=True,
+                key="heatmap_chart",
+            )
+            st.caption(
+                "Dias e horas são blocos relativos. Não são datas de calendário "
+                "nem horas de relógio confirmadas."
+            )
 
     with tab_transactions:
         st.subheader("Distribuição de valores")
@@ -323,29 +351,16 @@ def main() -> None:
         )
 
     with tab_frauds:
-        col_heat, col_corr = st.columns([1.6, 1])
-        with col_heat:
-            st.subheader("Mapa de calor de fraudes")
-            st.plotly_chart(
-                components.heatmap_chart(view["heatmap"]),
-                use_container_width=True,
-                key="heatmap_chart",
-            )
-            st.caption(
-                "Dias e horas são blocos relativos. Não são datas de calendário "
-                "nem horas de relógio confirmadas."
-            )
-        with col_corr:
-            st.subheader("Correlações com fraude")
-            st.plotly_chart(
-                components.correlation_chart(view["correlations"]),
-                use_container_width=True,
-                key="correlation_chart",
-            )
-            st.caption(
-                "Atributos são componentes PCA anonimizados; a correlação é "
-                "estatística, não um fator de negócio nomeado."
-            )
+        st.subheader("Correlações com fraude")
+        st.plotly_chart(
+            components.correlation_chart(view["correlations"]),
+            use_container_width=True,
+            key="correlation_chart",
+        )
+        st.caption(
+            "Atributos são componentes PCA anonimizados; a correlação é "
+            "estatística, não um fator de negócio nomeado."
+        )
 
     with tab_explorer:
         st.subheader("Explorador de transações")

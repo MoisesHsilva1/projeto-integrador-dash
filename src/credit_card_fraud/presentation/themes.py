@@ -9,7 +9,7 @@ LEGITIMATE_COLOR = "#2e9e6b"
 FRAUD_COLOR = "#d64545"
 NEUTRAL_COLOR = "#6c7a89"
 ALERT_COLOR = "#d9a441"
-BACKGROUND_COLOR = "#0e1117"
+BACKGROUND_COLOR = "#ffffff"
 
 SEMANTIC_COLORS = {
     "legitimate": LEGITIMATE_COLOR,
@@ -19,7 +19,7 @@ SEMANTIC_COLORS = {
 }
 
 DEFAULT_LAYOUT: dict[str, Any] = {
-    "template": "plotly_dark",
+    "template": "plotly_white",
     "font": {"family": "Inter, sans-serif", "size": 12},
     "margin": {"l": 40, "r": 20, "t": 50, "b": 40},
     "paper_bgcolor": "rgba(0,0,0,0)",
